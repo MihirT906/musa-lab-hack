@@ -2,6 +2,12 @@ export type Msg = { role: "user" | "assistant"; content: string };
 
 // Calls whichever provider has a key in .env.local. Gemini is tried first (free tier).
 export async function callLLM(system: string, messages: Msg[]): Promise<string> {
+  const text = (await request(system, messages)).trim();
+  if (!text) throw new Error("The model returned an empty reply. Try again.");
+  return text;
+}
+
+async function request(system: string, messages: Msg[]): Promise<string> {
   const geminiKey = process.env.GEMINI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
@@ -25,9 +31,7 @@ export async function callLLM(system: string, messages: Msg[]): Promise<string> 
     const data = await res.json();
     if (!res.ok) throw new Error(data?.error?.message || `Gemini error ${res.status}`);
     const parts = data?.candidates?.[0]?.content?.parts || [];
-    const text = parts.map((p: { text?: string }) => p.text || "").join("").trim();
-    if (!text) throw new Error("The model returned an empty reply. Try again.");
-    return text;
+    return parts.map((p: { text?: string }) => p.text || "").join("");
   }
 
   if (anthropicKey) {
@@ -43,12 +47,9 @@ export async function callLLM(system: string, messages: Msg[]): Promise<string> 
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data?.error?.message || `Anthropic error ${res.status}`);
-    const text = (data?.content || [])
+    return (data?.content || [])
       .map((b: { type: string; text?: string }) => (b.type === "text" ? b.text : ""))
-      .join("")
-      .trim();
-    if (!text) throw new Error("The model returned an empty reply. Try again.");
-    return text;
+      .join("");
   }
 
   throw new Error(

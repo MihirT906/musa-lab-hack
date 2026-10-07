@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { Msg } from "../lib/llm";
 import type { PublicScenario } from "../lib/scenarios";
 
-type Msg = { role: "user" | "assistant"; content: string };
 type Area = { score: number; note: string };
 type Grade = {
   overall: number;
@@ -20,8 +20,8 @@ async function post<T>(url: string, body: unknown): Promise<T> {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Something went wrong.");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Request failed (${res.status}).`);
   return data as T;
 }
 
@@ -34,6 +34,8 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
   const [grade, setGrade] = useState<Grade | null>(null);
   const [error, setError] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
+  // Bumped on every scenario load so replies from an abandoned call are dropped.
+  const session = useRef(0);
 
   const active = scenarios.find((s) => s.id === activeId)!;
 
@@ -42,7 +44,10 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
   }, [messages, grade, busy]);
 
   function load(id: string) {
+    session.current++;
     setActiveId(id);
+    setBusy(false);
+    setGrading(false);
     setMessages([]);
     setGrade(null);
     setError("");
@@ -63,29 +68,37 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
     setInput("");
     setError("");
     setBusy(true);
+    const id = session.current;
     try {
       const { reply } = await post<{ reply: string }>("/api/chat", {
         scenarioId: activeId,
         messages: next,
       });
+      if (id !== session.current) return;
       setMessages([...next, { role: "assistant", content: reply }]);
     } catch (err) {
+      if (id !== session.current) return;
+      // Drop the unanswered message so a retry doesn't send it twice.
+      setMessages(messages);
+      setInput(text);
       setError((err as Error).message);
     } finally {
-      setBusy(false);
+      if (id === session.current) setBusy(false);
     }
   }
 
   async function finish() {
-    if (grading || messages.length === 0) return;
+    if (busy || grading || messages.length === 0) return;
     setError("");
     setGrading(true);
+    const id = session.current;
     try {
-      setGrade(await post<Grade>("/api/grade", { scenarioId: activeId, messages }));
+      const result = await post<Grade>("/api/grade", { scenarioId: activeId, messages });
+      if (id === session.current) setGrade(result);
     } catch (err) {
-      setError((err as Error).message);
+      if (id === session.current) setError((err as Error).message);
     } finally {
-      setGrading(false);
+      if (id === session.current) setGrading(false);
     }
   }
 
@@ -130,7 +143,7 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
           <button
             className="btn primary"
             onClick={finish}
-            disabled={grading || messages.length === 0 || !!grade}
+            disabled={busy || grading || messages.length === 0 || !!grade}
           >
             {grading ? "Grading…" : "Finish and get score"}
           </button>
@@ -232,10 +245,10 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
                 ? "Call finished. Retry or pick another scenario."
                 : "Ask a question, take a reading, or state your diagnosis and fix"
             }
-            disabled={busy || !!grade}
+            disabled={busy || grading || !!grade}
             autoComplete="off"
           />
-          <button className="btn primary" type="submit" disabled={busy || !input.trim() || !!grade}>
+          <button className="btn primary" type="submit" disabled={busy || grading || !input.trim() || !!grade}>
             Send
           </button>
         </form>

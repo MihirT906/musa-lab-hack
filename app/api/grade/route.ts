@@ -9,6 +9,8 @@ export async function POST(req: Request) {
     const { scenarioId, messages } = (await req.json()) as { scenarioId: string; messages: Msg[] };
     const scenario = getScenario(scenarioId);
     if (!scenario) return NextResponse.json({ error: "Unknown scenario." }, { status: 400 });
+    if (!Array.isArray(messages) || messages.length === 0)
+      return NextResponse.json({ error: "No messages to send." }, { status: 400 });
 
     const transcript =
       `SIMULATOR: Homeowner: ${scenario.opening}\n` +
@@ -20,10 +22,12 @@ export async function POST(req: Request) {
       { role: "user", content: `Transcript of the call:\n\n${transcript}\n\nGrade it now.` },
     ]);
 
-    const start = raw.indexOf("{");
-    const end = raw.lastIndexOf("}");
-    if (start < 0 || end < 0) throw new Error("The grader did not return a score. Try again.");
-    const g = JSON.parse(raw.slice(start, end + 1));
+    let g;
+    try {
+      g = JSON.parse(raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1));
+    } catch {
+      throw new Error("The grader did not return a score. Try again.");
+    }
 
     const safety = clamp(g?.safety?.score);
     const order = clamp(g?.order?.score);
