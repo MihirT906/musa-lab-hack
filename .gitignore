@@ -2,6 +2,7 @@ node_modules
 .next
 .env.local
 next-env.d.ts
+*.tsbuildinfo
 
 # Copyrighted Carrier manuals; run scripts/fetch_sources.sh to download
 docs/sources/24*.pdf
