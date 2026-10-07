@@ -132,7 +132,7 @@ button, input { font: inherit; color: inherit; }
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 .mic:hover:not(:disabled) { background: var(--glass-strong); }
-.mic:active:not(:disabled), .mic.recording {
+.mic:active:not(:disabled), .mic.listening {
   color: #fff;
   background: rgba(255, 70, 70, 0.72);
   border-color: rgba(255, 180, 180, 0.95);

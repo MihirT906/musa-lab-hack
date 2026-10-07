@@ -49,10 +49,9 @@ This repository contains a working Next.js simulator with eight HVAC scenarios, 
 1. Install Node.js 18.18 or newer.
 2. Run `npm install`.
 3. Copy `.env.local.example` to `.env.local` and add one chat-model key: `GEMINI_API_KEY` (free tier, https://aistudio.google.com/apikey) or `ANTHROPIC_API_KEY` (https://console.anthropic.com).
-4. Add `OPENAI_API_KEY` to enable click-to-record transcription. Typed chat still works without it.
-5. Run `npm run dev` and open http://localhost:3000.
+4. Run `npm run dev` and open http://localhost:3000.
 
-Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and state your checks in the chat, then press Finish and get score. For voice input, click the microphone to start recording, click it again to stop, review the transcript, and press Send.
+Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and state your checks in the chat, then press Finish and get score. In a browser that supports speech recognition, click the microphone to start listening, click it again to stop, review the transcript, and press Send. Typed input remains available in every browser.
 
 ## Code Map
 
@@ -62,8 +61,7 @@ Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and sta
 - `lib/llm.ts`: model call (Gemini or Claude, chosen by which key is set)
 - `app/api/chat/route.ts`: homeowner and equipment agent
 - `app/api/grade/route.ts`: grading agent (safety, diagnostic order, use of evidence, right fix)
-- `app/api/transcribe/route.ts`: server-side voice transcription
-- `app/Simulator.tsx`, `app/globals.css`: glassmorphism UI with typed and click-to-record input
+- `app/Simulator.tsx`, `app/globals.css`: glassmorphism UI with typed input and browser speech recognition
 
 ## AI Build Log
 
@@ -77,6 +75,7 @@ The hackathon requires an AI-generated codebase and asks teams to record the too
 | Claude Code (Claude Opus 5.5) | Find official manufacturer manuals and OSHA safety references for one equipment family, extract cited facts for the Carrier 24ACC636, and write a set of scenario briefs grounded in them. | `docs/sources/`, `scenarios/`, `scripts/fetch_sources.sh` |
 | Claude Code (Claude Opus 5.5) | Merge the UI from main and wire the manual-grounded scenario briefs into the simulator. | `lib/manualScenarios.ts`, `lib/scenarios.ts`, `scenarios/*.json` |
 | OpenAI Codex | Add click-to-record voice input, server-side speech transcription, review-before-send behavior, accessible voice states, and configuration guidance without changing the existing chat or grading flow. | `app/Simulator.tsx`, `app/api/transcribe/route.ts`, styles, environment example, and README |
+| OpenAI Codex | Replace hosted voice transcription with browser-native speech recognition, preserving editable transcripts and typed fallback while removing the second API-key requirement. | `app/Simulator.tsx`, styles, environment example, README, and removal of the transcription route |
 
 ## Hackathon Pitch
 

@@ -15,6 +15,39 @@ type Grade = {
   nextTime: string[];
 };
 
+type BrowserSpeechResult = {
+  isFinal: boolean;
+  0?: { transcript: string };
+};
+
+type BrowserSpeechEvent = Event & {
+  resultIndex: number;
+  results: { length: number; [index: number]: BrowserSpeechResult };
+};
+
+type BrowserSpeechErrorEvent = Event & { error: string };
+
+type BrowserSpeechRecognition = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: BrowserSpeechEvent) => void) | null;
+  onerror: ((event: BrowserSpeechErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+};
+
+type BrowserSpeechRecognitionConstructor = new () => BrowserSpeechRecognition;
+
+declare global {
+  interface Window {
+    SpeechRecognition?: BrowserSpeechRecognitionConstructor;
+    webkitSpeechRecognition?: BrowserSpeechRecognitionConstructor;
+  }
+}
+
 async function post<T>(url: string, body: unknown): Promise<T> {
   const res = await fetch(url, {
     method: "POST",
@@ -34,11 +67,9 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
   const [grading, setGrading] = useState(false);
   const [grade, setGrade] = useState<Grade | null>(null);
   const [error, setError] = useState("");
-  const [voiceState, setVoiceState] = useState<"idle" | "requesting" | "recording" | "transcribing">("idle");
+  const [voiceState, setVoiceState] = useState<"idle" | "listening">("idle");
   const endRef = useRef<HTMLDivElement>(null);
-  const recorderRef = useRef<MediaRecorder | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
+  const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   // Bumped on every scenario load so replies from an abandoned call are dropped.
   const session = useRef(0);
 
@@ -49,121 +80,87 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
   }, [messages, grade, busy]);
 
   useEffect(() => {
-    return () => cancelRecording();
+    return () => cancelRecognition();
   }, []);
 
-  function releaseStream() {
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    streamRef.current = null;
+  function cancelRecognition() {
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    if (!recognition) return;
+    recognition.onresult = null;
+    recognition.onerror = null;
+    recognition.onend = null;
+    recognition.abort();
   }
 
-  function cancelRecording() {
-    const recorder = recorderRef.current;
-    recorderRef.current = null;
-    if (recorder?.state === "recording") {
-      recorder.ondataavailable = null;
-      recorder.onstop = null;
-      recorder.stop();
-    }
-    chunksRef.current = [];
-    releaseStream();
-  }
-
-  async function transcribe(blob: Blob, sessionId: number) {
-    if (blob.size === 0) {
-      setError("No audio was captured. Click the microphone, speak, then click it again to stop.");
-      setVoiceState("idle");
-      return;
-    }
-
-    setVoiceState("transcribing");
-    try {
-      const extension = blob.type.includes("mp4") ? "mp4" : "webm";
-      const form = new FormData();
-      form.append("audio", blob, `fieldready-recording.${extension}`);
-      const res = await fetch("/api/transcribe", { method: "POST", body: form });
-      const data = await res.json().catch(() => ({}));
-      if (sessionId !== session.current) return;
-      if (!res.ok) throw new Error(data.error || `Transcription failed (${res.status}).`);
-
-      const text = String(data.text || "").trim();
-      if (!text) throw new Error("No speech was detected. Try recording for a little longer.");
-      setInput((current) => (current.trim() ? `${current.trim()} ${text}` : text));
-    } catch (err) {
-      if (sessionId === session.current) setError((err as Error).message);
-    } finally {
-      if (sessionId === session.current) setVoiceState("idle");
-    }
-  }
-
-  async function startRecording() {
+  function startRecognition() {
     if (busy || grading || grade || voiceState !== "idle") return;
-    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) {
       setError("Voice input is not supported in this browser. You can still type your response.");
       return;
     }
 
     setError("");
-    const recordingSession = session.current;
-    setVoiceState("requesting");
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (recordingSession !== session.current) {
-        stream.getTracks().forEach((track) => track.stop());
-        return;
+    const recognitionSession = session.current;
+    const startingText = input.trim();
+    let finalText = "";
+    const recognition = new Recognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event) => {
+      if (recognitionSession !== session.current) return;
+      let interimText = "";
+      for (let index = event.resultIndex; index < event.results.length; index++) {
+        const text = event.results[index][0]?.transcript.trim() || "";
+        if (event.results[index].isFinal) finalText = `${finalText} ${text}`.trim();
+        else interimText = `${interimText} ${text}`.trim();
       }
+      setInput([startingText, finalText, interimText].filter(Boolean).join(" "));
+    };
 
-      const preferredType = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"].find((type) =>
-        MediaRecorder.isTypeSupported(type)
-      );
-      const recorder = new MediaRecorder(stream, preferredType ? { mimeType: preferredType } : undefined);
-      streamRef.current = stream;
-      recorderRef.current = recorder;
-      chunksRef.current = [];
-
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) chunksRef.current.push(event.data);
-      };
-      recorder.onerror = () => {
-        setError("The recording could not be completed. Please try again or type your response.");
-        cancelRecording();
-        setVoiceState("idle");
-      };
-      recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
-        chunksRef.current = [];
-        recorderRef.current = null;
-        releaseStream();
-        void transcribe(blob, recordingSession);
-      };
-
-      recorder.start();
-      setVoiceState("recording");
-    } catch (err) {
-      releaseStream();
-      if (recordingSession !== session.current) return;
-      setVoiceState("idle");
-      const name = (err as DOMException).name;
-      setError(
-        name === "NotAllowedError"
+    recognition.onerror = (event) => {
+      if (recognitionSession !== session.current || event.error === "aborted") return;
+      const message =
+        event.error === "not-allowed" || event.error === "service-not-allowed"
           ? "Microphone access was not allowed. Enable it for this site or use the text box."
-          : "The microphone could not be started. Please try again or type your response."
-      );
+          : event.error === "no-speech"
+            ? "No speech was detected. Click the microphone and try again."
+            : event.error === "network"
+              ? "Speech recognition could not reach the browser service. You can still type your response."
+              : "Speech recognition stopped unexpectedly. Please try again or type your response.";
+      setError(message);
+    };
+
+    recognition.onend = () => {
+      recognitionRef.current = null;
+      if (recognitionSession === session.current) setVoiceState("idle");
+    };
+
+    recognitionRef.current = recognition;
+    try {
+      recognition.start();
+      setVoiceState("listening");
+    } catch (err) {
+      recognitionRef.current = null;
+      setVoiceState("idle");
+      setError((err as Error).message || "Speech recognition could not be started.");
     }
   }
 
-  function stopRecording() {
-    const recorder = recorderRef.current;
-    if (recorder?.state === "recording") recorder.stop();
+  function stopRecognition() {
+    recognitionRef.current?.stop();
   }
 
-  function toggleRecording() {
-    if (voiceState === "recording") stopRecording();
-    else if (voiceState === "idle") void startRecording();
+  function toggleRecognition() {
+    if (voiceState === "listening") stopRecognition();
+    else if (voiceState === "idle") startRecognition();
   }
 
   function load(id: string) {
-    cancelRecording();
+    cancelRecognition();
     session.current++;
     setActiveId(id);
     setBusy(false);
@@ -344,11 +341,11 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
         <form className="composer" onSubmit={send}>
           <button
             type="button"
-            className={`mic ${voiceState === "recording" ? "recording" : ""}`}
-            disabled={busy || grading || !!grade || voiceState === "requesting" || voiceState === "transcribing"}
-            aria-label={voiceState === "recording" ? "Stop recording and transcribe" : "Start voice recording"}
-            title={voiceState === "recording" ? "Stop recording and transcribe" : "Start voice recording"}
-            onClick={toggleRecording}
+            className={`mic ${voiceState === "listening" ? "listening" : ""}`}
+            disabled={busy || grading || !!grade}
+            aria-label={voiceState === "listening" ? "Stop voice recognition" : "Start voice recognition"}
+            title={voiceState === "listening" ? "Stop voice recognition" : "Start voice recognition"}
+            onClick={toggleRecognition}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <rect x="9" y="3" width="6" height="11" rx="3" />
@@ -366,13 +363,9 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
             placeholder={
               grade
                 ? "Call finished. Retry or pick another scenario."
-                : voiceState === "recording"
-                  ? "Recording… click the microphone when you finish"
-                  : voiceState === "requesting"
-                    ? "Waiting for microphone access…"
-                    : voiceState === "transcribing"
-                      ? "Turning your speech into text…"
-                      : "Ask a question, take a reading, or state your diagnosis and fix"
+                : voiceState === "listening"
+                  ? "Listening… click the microphone when you finish"
+                  : "Ask a question, take a reading, or state your diagnosis and fix"
             }
             disabled={busy || grading || !!grade || voiceState !== "idle"}
             autoComplete="off"
@@ -385,13 +378,7 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
             Send
           </button>
           <span className="srOnly" aria-live="polite">
-            {voiceState === "recording"
-              ? "Recording. Click the microphone when you finish speaking."
-              : voiceState === "requesting"
-                ? "Waiting for microphone access."
-                : voiceState === "transcribing"
-                  ? "Transcribing your recording."
-                  : ""}
+            {voiceState === "listening" ? "Listening. Click the microphone when you finish speaking." : ""}
           </span>
         </form>
       </section>
