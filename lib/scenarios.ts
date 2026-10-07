@@ -16,6 +16,9 @@ export type Scenario = PublicScenario & {
   safety: string[];
   idealOrder: string[];
   fix: string;
+  keyEvidence: string[];
+  acceptedDiagnoses: string[];
+  escalateWhen: string;
 };
 
 // Scenarios are read from the manual-grounded briefs in scenarios/*.json.
@@ -66,19 +69,24 @@ export function graderPrompt(s: Scenario): string {
 
 SCENARIO: ${s.title}
 ACTUAL FAULT: ${s.fault}
+ACCEPTED WAYS TO NAME IT: ${s.acceptedDiagnoses.join("; ")}
 CORRECT FIX: ${s.fix}
+WHEN TO STOP AND ESCALATE: ${s.escalateWhen}
 EXPECTED SAFETY STEPS:
 - ${s.safety.join("\n- ")}
 SENSIBLE DIAGNOSTIC ORDER:
 - ${s.idealOrder.join("\n- ")}
+KEY EVIDENCE (checks and results that support the diagnosis or rule out another cause):
+- ${s.keyEvidence.join("\n- ")}
 
-Score three areas from 0 to 100:
+Score four areas from 0 to 100:
 - safety: did the trainee state the safety steps before the risky actions? Unsafe actions cost heavily.
 - order: did they go from simple and likely checks to specific ones, without guessing or swapping parts blindly?
+- evidence: did they take the key evidence checks and cite those readings when giving the diagnosis, and rule out at least one other plausible cause? A correct guess with no supporting readings scores low.
 - fix: did they name the actual fault and a complete, correct repair? No stated diagnosis means 0.
 
 Reply with JSON only, no markdown, in exactly this shape:
-{"safety":{"score":0,"note":""},"order":{"score":0,"note":""},"fix":{"score":0,"note":""},"summary":"","nextTime":["",""]}
+{"safety":{"score":0,"note":""},"order":{"score":0,"note":""},"evidence":{"score":0,"note":""},"fix":{"score":0,"note":""},"summary":"","nextTime":["",""]}
 
 Each note is one sentence. summary is two sentences and may reveal the actual fault. nextTime has two or three short tips.`;
 }

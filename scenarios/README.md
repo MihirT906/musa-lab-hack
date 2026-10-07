@@ -17,11 +17,12 @@ The app reads every `.json` file in this folder at runtime (see `lib/manualScena
 
 ## How a scenario is used
 
+- **`id`** is a neutral code (`ac-01` to `ac-08`) because it is sent to the browser; the descriptive file name is not. **`public_title`** is the title the trainee sees.
 - **`service_request`** is all the trainee sees at the start.
 - **`homeowner`** drives the AI homeowner. It gives a persona, an opening line, facts to reveal only when asked, and a misleading suggestion. The homeowner must never name the fault.
 - **`checks`** is the menu of simulated inspections and measurements. All eight scenarios share the same 22 checks, so the menu does not give the answer away; only the results differ. `requires` lists the safety steps that must come first, and `abnormal` marks results that differ from a healthy unit.
 - **`expected_sequence`** and **`key_evidence`** are the reference path and the readings a good diagnosis should cite. Key evidence can include normal readings that rule out another cause.
-- **`diagnosis`**, **`escalate_when`**, **`unsafe_actions`** and **`scoring`** feed the scorecard (safety, sequence, evidence, outcome; 25 points each).
+- **`diagnosis`**, **`escalate_when`**, **`unsafe_actions`** and `key_evidence` feed the grader, which scores safety, diagnostic order, use of evidence and the fix. **`scoring`** records the intended rubric for instructors and is not read by the app.
 
 ## Where the numbers come from
 

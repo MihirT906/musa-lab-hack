@@ -11,9 +11,10 @@ type Brief = {
   conditions: { outdoor_temp_f: number; indoor_temp_f: number };
   hidden_fault: { description: string };
   homeowner: { name: string; persona: string; opening_line: string; reveals_if_asked: string[]; red_herring: string };
-  checks: { id: string; label: string; requires: string[]; result: string }[];
+  checks: { id: string; label: string; requires: string[]; result: string; cite: string }[];
   expected_sequence: string[];
-  diagnosis: { repair: string };
+  key_evidence: string[];
+  diagnosis: { accept: string[]; repair: string };
   escalate_when: string;
   unsafe_actions: { action: string }[];
 };
@@ -29,6 +30,7 @@ function prerequisite(requires: string[]): string {
 
 function toScenario(b: Brief): Scenario {
   const label = new Map(b.checks.map((c) => [c.id, c.label]));
+  const check = new Map(b.checks.map((c) => [c.id, c]));
   const safety = [
     ...(b.expected_sequence.includes("lockout") ? [LOCKOUT] : []),
     ...(b.expected_sequence.includes("cap_discharge") ? [DISCHARGE] : []),
@@ -55,6 +57,12 @@ function toScenario(b: Brief): Scenario {
       ...b.expected_sequence.map((id) => label.get(id) ?? id),
     ],
     fix: b.diagnosis.repair,
+    keyEvidence: b.key_evidence.map((id) => {
+      const c = check.get(id);
+      return c ? `${c.label}: ${c.result}` : id;
+    }),
+    acceptedDiagnoses: b.diagnosis.accept,
+    escalateWhen: b.escalate_when,
   };
 }
 

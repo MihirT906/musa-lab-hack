@@ -9,6 +9,7 @@ type Grade = {
   overall: number;
   safety: Area;
   order: Area;
+  evidence: Area;
   fix: Area;
   summary: string;
   nextTime: string[];
@@ -181,6 +182,7 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
                   [
                     ["Safety steps", grade.safety],
                     ["Diagnostic order", grade.order],
+                    ["Use of evidence", grade.evidence],
                     ["Right fix", grade.fix],
                   ] as [string, Area][]
                 ).map(([label, a]) => (

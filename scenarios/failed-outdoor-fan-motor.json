@@ -1,5 +1,5 @@
 {
-  "id": "failed-outdoor-fan-motor",
+  "id": "ac-05",
   "title": "Warm air: outdoor fan motor has an open winding",
   "public_title": "AC cools briefly, then goes warm",
   "difficulty": "intermediate",

@@ -60,7 +60,7 @@ Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and sta
 - `lib/manualScenarios.ts`: reads every brief in `scenarios/` at runtime and converts it to the simulator's scenario format
 - `lib/llm.ts`: model call (Gemini or Claude, chosen by which key is set)
 - `app/api/chat/route.ts`: homeowner and equipment agent
-- `app/api/grade/route.ts`: grading agent (safety, diagnostic order, right fix)
+- `app/api/grade/route.ts`: grading agent (safety, diagnostic order, use of evidence, right fix)
 - `app/Simulator.tsx`, `app/globals.css`: glassmorphism UI; the mic button is a placeholder for voice
 
 ## AI Build Log
