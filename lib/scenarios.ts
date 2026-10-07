@@ -8,6 +8,13 @@ export type PublicScenario = {
   opening: string;
 };
 
+export type ScenarioScoring = {
+  safety: { points: number; criteria: string };
+  sequence: { points: number; criteria: string };
+  evidence: { points: number; criteria: string };
+  outcome: { points: number; criteria: string };
+};
+
 export type Scenario = PublicScenario & {
   // Everything below stays on the server. The trainee never sees it.
   setting: string;
@@ -19,6 +26,7 @@ export type Scenario = PublicScenario & {
   keyEvidence: string[];
   acceptedDiagnoses: string[];
   escalateWhen: string;
+  scoring: ScenarioScoring;
 };
 
 // Scenarios are read from the manual-grounded briefs in scenarios/*.json.
@@ -79,11 +87,13 @@ SENSIBLE DIAGNOSTIC ORDER:
 KEY EVIDENCE (checks and results that support the diagnosis or rule out another cause):
 - ${s.keyEvidence.join("\n- ")}
 
-Score four areas from 0 to 100:
-- safety: did the trainee state the safety steps before the risky actions? Unsafe actions cost heavily.
-- order: did they go from simple and likely checks to specific ones, without guessing or swapping parts blindly?
-- evidence: did they take the key evidence checks and cite those readings when giving the diagnosis, and rule out at least one other plausible cause? A correct guess with no supporting readings scores low.
-- fix: did they name the actual fault and a complete, correct repair? No stated diagnosis means 0.
+SCENARIO-PROVIDED SCORING RUBRIC:
+- safety (${s.scoring.safety.points} weight points): ${s.scoring.safety.criteria}
+- order (${s.scoring.sequence.points} weight points): ${s.scoring.sequence.criteria}
+- evidence (${s.scoring.evidence.points} weight points): ${s.scoring.evidence.criteria}
+- fix (${s.scoring.outcome.points} weight points): ${s.scoring.outcome.criteria}
+
+Score each area from 0 to 100 as a percentage of how well the trainee met that area's criteria. The point allocations above are weights for the overall result, not the maximum area scores. Grade only actions stated in the transcript. Unsafe actions should cost heavily, a correct guess without supporting readings should score low on evidence, and no stated diagnosis means a fix score of 0.
 
 Reply with JSON only, no markdown, in exactly this shape:
 {"safety":{"score":0,"note":""},"order":{"score":0,"note":""},"evidence":{"score":0,"note":""},"fix":{"score":0,"note":""},"summary":"","nextTime":["",""]}
