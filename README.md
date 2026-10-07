@@ -57,7 +57,7 @@ Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and sta
 
 - `lib/scenarios.ts`: scenario list, hidden faults, readings, and the simulator and grader prompts
 - `scenarios/*.json`: manual-grounded scenario briefs with cited readings
-- `lib/manualScenarios.ts`: loads those briefs into the simulator's scenario format
+- `lib/manualScenarios.ts`: reads every brief in `scenarios/` at runtime and converts it to the simulator's scenario format
 - `lib/llm.ts`: model call (Gemini or Claude, chosen by which key is set)
 - `app/api/chat/route.ts`: homeowner and equipment agent
 - `app/api/grade/route.ts`: grading agent (safety, diagnostic order, right fix)

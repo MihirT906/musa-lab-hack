@@ -1,12 +1,6 @@
+import { readdirSync, readFileSync } from "fs";
+import path from "path";
 import type { Scenario } from "./scenarios";
-import failedRunCapacitor from "../scenarios/failed-run-capacitor.json";
-import openContactorCoil from "../scenarios/open-contactor-coil.json";
-import disconnectOff from "../scenarios/disconnect-off.json";
-import dirtyAirFilter from "../scenarios/dirty-air-filter.json";
-import failedOutdoorFanMotor from "../scenarios/failed-outdoor-fan-motor.json";
-import dirtyCondenserCoil from "../scenarios/dirty-condenser-coil.json";
-import cutThermostatCable from "../scenarios/cut-thermostat-cable.json";
-import lowRefrigerantCharge from "../scenarios/low-refrigerant-charge.json";
 
 // Shape of the manual-grounded briefs in scenarios/*.json (see scenarios/README.md).
 type Brief = {
@@ -64,15 +58,16 @@ function toScenario(b: Brief): Scenario {
   };
 }
 
-export const manualScenarios: Scenario[] = (
-  [
-    failedRunCapacitor,
-    openContactorCoil,
-    disconnectOff,
-    dirtyAirFilter,
-    failedOutdoorFanMotor,
-    dirtyCondenserCoil,
-    cutThermostatCable,
-    lowRefrigerantCharge,
-  ] as Brief[]
-).map(toScenario);
+const LEVELS = ["beginner", "intermediate", "advanced"];
+
+// Reads every brief in scenarios/ on each call, so adding or editing a JSON file
+// there changes the app without touching code. Server only.
+export function manualScenarios(): Scenario[] {
+  const dir = path.join(process.cwd(), "scenarios");
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".json"))
+    .sort()
+    .map((f) => JSON.parse(readFileSync(path.join(dir, f), "utf8")) as Brief)
+    .sort((a, b) => LEVELS.indexOf(a.difficulty) - LEVELS.indexOf(b.difficulty))
+    .map(toScenario);
+}

@@ -13,7 +13,7 @@ Eight practice service calls for one unit, the Carrier 24ACC636 air conditioner.
 | [cut-thermostat-cable.json](cut-thermostat-cable.json) | Outside unit does nothing | Low-voltage cable cut | Intermediate |
 | [low-refrigerant-charge.json](low-refrigerant-charge.json) | Runs nonstop, only slightly cool | Undercharged from a slow leak | Advanced |
 
-[index.json](index.json) lists the scenarios for the app to load.
+The app reads every `.json` file in this folder at runtime (see `lib/manualScenarios.ts`). To add a scenario, add a file here in the same format; no code change is needed.
 
 ## How a scenario is used
 

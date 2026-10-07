@@ -18,7 +18,7 @@ export type Scenario = PublicScenario & {
   fix: string;
 };
 
-// The air conditioner scenarios come from the manual-grounded briefs in scenarios/*.json.
+// The air conditioner scenarios are read from the manual-grounded briefs in scenarios/*.json.
 const otherScenarios: Scenario[] = [
   {
     id: "furnace-flame-sensor",
@@ -153,14 +153,16 @@ const otherScenarios: Scenario[] = [
   },
 ];
 
-export const scenarios: Scenario[] = [...manualScenarios, ...otherScenarios];
+function allScenarios(): Scenario[] {
+  return [...manualScenarios(), ...otherScenarios];
+}
 
 export function getScenario(id: string): Scenario | undefined {
-  return scenarios.find((s) => s.id === id);
+  return allScenarios().find((s) => s.id === id);
 }
 
 export function publicScenarios(): PublicScenario[] {
-  return scenarios.map(({ id, trade, title, difficulty, opening }) => ({
+  return allScenarios().map(({ id, trade, title, difficulty, opening }) => ({
     id,
     trade,
     title,
