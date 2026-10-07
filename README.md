@@ -55,11 +55,92 @@ Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and sta
 
 ## Code Map
 
-- `lib/scenarios.ts`: scenarios, hidden faults, readings, and the simulator and grader prompts
+- `lib/scenarios.ts`: scenarios, hidden faults, readings, and the simulator prompt
 - `lib/llm.ts`: model call (Gemini or Claude, chosen by which key is set)
+- `lib/grading/`: rule-based grading layer (adapters, grader, structured answer keys)
 - `app/api/chat/route.ts`: homeowner and equipment agent
-- `app/api/grade/route.ts`: grading agent (safety, diagnostic order, right fix)
+- `app/api/grade/route.ts`: POST endpoint that returns a Scorecard JSON
 - `app/Simulator.tsx`, `app/globals.css`: glassmorphism UI; the mic button is a placeholder for voice
+
+## Grading layer
+
+The grader sits between the scenario answer key and the UI session log. It is **rule-based and deterministic** (no LLM).
+
+### Inputs
+
+**Answer key** (structured JSON in `lib/grading/answerKeys/<scenarioId>.json`):
+
+- `actions` — stable action ids with kind, safety flags, and optional `irrelevant`
+- `requiredSafety` — must complete before any check with `requiresSafetyBefore: true`
+- `orderingRules` — A-before-B pairs with trainee-facing messages
+- `keyEvidence` — readings that prove the fault
+- `diagnosis` / `repair` — correct and partial match strings with credit
+
+The free-text fields in `lib/scenarios.ts` are for the simulator agent. Grading uses the structured keys above so format changes stay in adapters.
+
+**Session log** (what the UI should POST to `/api/grade`):
+
+```json
+{
+  "scenarioId": "ac-capacitor",
+  "events": [
+    { "type": "question", "actionId": "ask_symptoms" },
+    { "type": "check", "actionId": "observe_outdoor_unit" },
+    { "type": "safety", "actionId": "power_off_disconnect" },
+    { "type": "cite_evidence", "actionId": "observe_outdoor_unit" },
+    { "type": "diagnosis", "value": "Failed dual run capacitor" },
+    { "type": "repair", "value": "Replace the dual run capacitor with 45/5 µF" }
+  ]
+}
+```
+
+Event types: `safety` | `question` | `check` | `cite_evidence` | `diagnosis` | `repair`.
+
+### Scoring (weights in `lib/grading/config.ts`)
+
+| Category | Max | Rules |
+| --- | --- | --- |
+| Safety | 35 | Required safety steps before hands-on electrical checks. Skipping one is a **critical** violation: safety = 0 and the session fails. |
+| Diagnostic sequence | 25 | Deductions for violated A-before-B rules; small capped deduction for irrelevant checks. Extra safety steps are never penalized. |
+| Use of evidence | 20 | Key readings taken; cited evidence must appear earlier in the log. Correct diagnosis with no supporting readings loses evidence (lucky guess). |
+| Outcome | 20 | Diagnosis (10) + repair (10), with partial credit from the answer key. |
+
+Pass: no critical safety violation, session not empty, and total ≥ 60.
+
+### Output (Scorecard)
+
+Example: `lib/grading/example-scorecard.json`
+
+```json
+{
+  "scenarioId": "ac-capacitor",
+  "categories": {
+    "safety": { "score": 0, "max": 35 },
+    "sequence": { "score": 15, "max": 25 },
+    "evidence": { "score": 10, "max": 20 },
+    "outcome": { "score": 20, "max": 20 }
+  },
+  "total": 45,
+  "maxTotal": 100,
+  "passed": false,
+  "findings": [
+    {
+      "category": "safety",
+      "severity": "critical",
+      "message": "De-energize and verify before handling components: missing or late step — Shut off power at the outdoor disconnect before opening the panel.",
+      "event_index": 1
+    }
+  ]
+}
+```
+
+### API for the UI
+
+- `POST /api/grade` with the session JSON above → Scorecard
+- Or import `gradeWithBuiltinKey` / `gradeSession` from `lib/grading`
+- Run tests: `npm test` (uses `ac-capacitor` fixtures)
+
+Only `ac-capacitor` has a structured answer key so far. Add `lib/grading/answerKeys/<id>.json` for other scenarios.
 
 ## AI Build Log
 
@@ -70,6 +151,7 @@ The hackathon requires an AI-generated codebase and asks teams to record the too
 | GitHub Copilot | Turn the supplied HVAC/electrical service-call simulator concept and hackathon brief into a project README. | This README only |
 | Claude (`claude-fable-5-1`) | Build the service-call simulator as a localhost Next.js web UI with glassmorphism: scenario list and shuffle button on the left, chat with the loaded scenario on the right, a grading agent that scores the interaction, voice as a future step. | All app code |
 | Claude Code (`claude-opus-5-5`) | Run the project, then make sure there is no redundant code and no errors. | Bug and error-handling fixes in `app/` and `lib/`, `next.config.ts`, `.claude/launch.json` |
+| Cursor | Grading layer connecting scenario JSON and UI | grading module (`lib/grading/`, `/api/grade`) |
 
 ## Hackathon Pitch
 

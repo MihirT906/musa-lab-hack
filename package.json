@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "npx --yes tsx --test lib/grading/grader.test.ts"
   },
   "dependencies": {
     "next": "^15.1.0",

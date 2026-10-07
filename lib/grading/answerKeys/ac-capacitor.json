@@ -1,0 +1,159 @@
+{
+  "scenarioId": "ac-capacitor",
+  "actions": {
+    "power_off_disconnect": {
+      "id": "power_off_disconnect",
+      "kind": "safety",
+      "label": "Shut off power at the outdoor disconnect before opening the panel",
+      "requiresSafetyBefore": false,
+      "isKeyEvidence": false
+    },
+    "verify_zero_voltage": {
+      "id": "verify_zero_voltage",
+      "kind": "safety",
+      "label": "Verify zero voltage with a meter before touching anything",
+      "requiresSafetyBefore": false,
+      "isKeyEvidence": false
+    },
+    "discharge_capacitor": {
+      "id": "discharge_capacitor",
+      "kind": "safety",
+      "label": "Discharge the capacitor before handling it",
+      "requiresSafetyBefore": false,
+      "isKeyEvidence": false
+    },
+    "ask_symptoms": {
+      "id": "ask_symptoms",
+      "kind": "question",
+      "label": "Ask the homeowner about symptoms and history",
+      "requiresSafetyBefore": false,
+      "isKeyEvidence": false
+    },
+    "check_thermostat_airflow": {
+      "id": "check_thermostat_airflow",
+      "kind": "observation",
+      "label": "Check thermostat and indoor airflow",
+      "requiresSafetyBefore": false,
+      "isKeyEvidence": false
+    },
+    "observe_outdoor_unit": {
+      "id": "observe_outdoor_unit",
+      "kind": "observation",
+      "label": "Observe the outdoor unit",
+      "requiresSafetyBefore": false,
+      "isKeyEvidence": true
+    },
+    "check_contactor_voltage": {
+      "id": "check_contactor_voltage",
+      "kind": "electrical_check",
+      "label": "Check control voltage and line voltage at the contactor",
+      "requiresSafetyBefore": false,
+      "isKeyEvidence": true
+    },
+    "capacitor_visual": {
+      "id": "capacitor_visual",
+      "kind": "observation",
+      "label": "Capacitor visual: top is bulged",
+      "requiresSafetyBefore": true,
+      "isKeyEvidence": true
+    },
+    "test_capacitor": {
+      "id": "test_capacitor",
+      "kind": "invasive_check",
+      "label": "Capacitor test (rated 45/5 µF)",
+      "requiresSafetyBefore": true,
+      "isKeyEvidence": true
+    },
+    "compressor_windings": {
+      "id": "compressor_windings",
+      "kind": "invasive_check",
+      "label": "Compressor windings resistance",
+      "requiresSafetyBefore": true,
+      "isKeyEvidence": false
+    },
+    "check_breaker_filter": {
+      "id": "check_breaker_filter",
+      "kind": "observation",
+      "label": "Breaker and filter check",
+      "requiresSafetyBefore": false,
+      "isKeyEvidence": false
+    },
+    "gauge_refrigerant": {
+      "id": "gauge_refrigerant",
+      "kind": "other",
+      "label": "Connect refrigerant gauges (not indicated for this fault)",
+      "requiresSafetyBefore": false,
+      "isKeyEvidence": false,
+      "irrelevant": true
+    }
+  },
+  "requiredSafety": [
+    "power_off_disconnect",
+    "verify_zero_voltage",
+    "discharge_capacitor"
+  ],
+  "orderingRules": [
+    {
+      "before": "ask_symptoms",
+      "after": "test_capacitor",
+      "message": "Ask about symptoms before invasive component testing."
+    },
+    {
+      "before": "check_thermostat_airflow",
+      "after": "test_capacitor",
+      "message": "Check thermostat and airflow before invasive capacitor testing."
+    },
+    {
+      "before": "observe_outdoor_unit",
+      "after": "test_capacitor",
+      "message": "Observe the outdoor unit before invasive capacitor testing."
+    },
+    {
+      "before": "ask_symptoms",
+      "after": "compressor_windings",
+      "message": "Ask about symptoms before invasive winding checks."
+    },
+    {
+      "before": "check_thermostat_airflow",
+      "after": "compressor_windings",
+      "message": "Check thermostat and airflow before invasive winding checks."
+    },
+    {
+      "before": "observe_outdoor_unit",
+      "after": "check_contactor_voltage",
+      "message": "Observe the outdoor unit before electrical checks at the contactor."
+    }
+  ],
+  "keyEvidence": [
+    "observe_outdoor_unit",
+    "check_contactor_voltage",
+    "capacitor_visual",
+    "test_capacitor"
+  ],
+  "diagnosis": {
+    "correct": [
+      { "match": "failed dual run capacitor", "credit": 10 },
+      { "match": "bad dual run capacitor", "credit": 10 },
+      { "match": "failed capacitor", "credit": 10 },
+      { "match": "bad capacitor", "credit": 10 },
+      { "match": "run capacitor", "credit": 10 }
+    ],
+    "partial": [
+      { "match": "capacitor", "credit": 5 },
+      { "match": "condenser fan", "credit": 3 }
+    ]
+  },
+  "repair": {
+    "correct": [
+      { "match": "replace the dual run capacitor", "credit": 10 },
+      { "match": "replace dual run capacitor", "credit": 10 },
+      { "match": "replace the capacitor", "credit": 10 },
+      { "match": "replace capacitor", "credit": 10 },
+      { "match": "45/5", "credit": 10 }
+    ],
+    "partial": [
+      { "match": "replace", "credit": 4 },
+      { "match": "capacitor", "credit": 4 }
+    ]
+  }
+}
