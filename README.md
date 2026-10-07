@@ -42,7 +42,7 @@ The intended first version is a focused service-call loop:
 - A diagnosis and repair recommendation from the trainee
 - A short scorecard covering safety, diagnostic sequence, evidence, and outcome
 
-This repository contains a working Next.js simulator with twelve scenarios (ten HVAC, two electrical). Eight of the HVAC scenarios are grounded in the manufacturer manuals for one unit, a Carrier 24ACC636 air conditioner; see [scenarios/](scenarios/) and the [source manuals and unit facts](docs/sources/).
+This repository contains a working Next.js simulator with eight HVAC scenarios, all grounded in the manufacturer manuals for one unit, a Carrier 24ACC636 air conditioner; see [scenarios/](scenarios/) and the [source manuals and unit facts](docs/sources/).
 
 ## Run It Locally
 
@@ -55,7 +55,7 @@ Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and sta
 
 ## Code Map
 
-- `lib/scenarios.ts`: scenario list, hidden faults, readings, and the simulator and grader prompts
+- `lib/scenarios.ts`: scenario types and the simulator and grader prompts
 - `scenarios/*.json`: manual-grounded scenario briefs with cited readings
 - `lib/manualScenarios.ts`: reads every brief in `scenarios/` at runtime and converts it to the simulator's scenario format
 - `lib/llm.ts`: model call (Gemini or Claude, chosen by which key is set)
