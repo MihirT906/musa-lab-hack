@@ -1,6 +1,7 @@
 {
   "id": "low-refrigerant-charge",
   "title": "Poor cooling: system is low on refrigerant",
+  "public_title": "AC runs nonstop, barely cool",
   "difficulty": "advanced",
   "equipment": {
     "make": "Carrier",

@@ -1,6 +1,7 @@
 {
   "id": "disconnect-off",
   "title": "No cooling: outdoor disconnect left in the OFF position",
+  "public_title": "AC quit after work outside",
   "difficulty": "beginner",
   "equipment": {
     "make": "Carrier",

@@ -1,6 +1,7 @@
 {
   "id": "dirty-air-filter",
   "title": "Weak, warm airflow: clogged filter and frosted indoor coil",
+  "public_title": "AC runs constantly, weak airflow",
   "difficulty": "beginner",
   "equipment": {
     "make": "Carrier",

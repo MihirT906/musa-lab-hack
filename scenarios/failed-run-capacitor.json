@@ -1,6 +1,7 @@
 {
   "id": "failed-run-capacitor",
   "title": "Warm air: compressor side of the run capacitor has failed",
+  "public_title": "AC running but blowing warm air",
   "difficulty": "beginner",
   "equipment": {
     "make": "Carrier",

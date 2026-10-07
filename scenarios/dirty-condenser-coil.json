@@ -1,6 +1,7 @@
 {
   "id": "dirty-condenser-coil",
   "title": "Intermittent cooling: outdoor coil is blocked with debris",
+  "public_title": "AC warm on hot afternoons",
   "difficulty": "intermediate",
   "equipment": {
     "make": "Carrier",

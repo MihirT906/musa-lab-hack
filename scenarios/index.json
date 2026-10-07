@@ -10,49 +10,57 @@
       "id": "failed-run-capacitor",
       "title": "Warm air: compressor side of the run capacitor has failed",
       "difficulty": "beginner",
-      "file": "failed-run-capacitor.json"
+      "file": "failed-run-capacitor.json",
+      "public_title": "AC running but blowing warm air"
     },
     {
       "id": "open-contactor-coil",
       "title": "No cooling: contactor coil is open",
       "difficulty": "beginner",
-      "file": "open-contactor-coil.json"
+      "file": "open-contactor-coil.json",
+      "public_title": "Outdoor unit dead, indoor fan runs"
     },
     {
       "id": "failed-outdoor-fan-motor",
       "title": "Warm air: outdoor fan motor has an open winding",
       "difficulty": "intermediate",
-      "file": "failed-outdoor-fan-motor.json"
+      "file": "failed-outdoor-fan-motor.json",
+      "public_title": "AC cools briefly, then goes warm"
     },
     {
       "id": "dirty-air-filter",
       "title": "Weak, warm airflow: clogged filter and frosted indoor coil",
       "difficulty": "beginner",
-      "file": "dirty-air-filter.json"
+      "file": "dirty-air-filter.json",
+      "public_title": "AC runs constantly, weak airflow"
     },
     {
       "id": "low-refrigerant-charge",
       "title": "Poor cooling: system is low on refrigerant",
       "difficulty": "advanced",
-      "file": "low-refrigerant-charge.json"
+      "file": "low-refrigerant-charge.json",
+      "public_title": "AC runs nonstop, barely cool"
     },
     {
       "id": "disconnect-off",
       "title": "No cooling: outdoor disconnect left in the OFF position",
       "difficulty": "beginner",
-      "file": "disconnect-off.json"
+      "file": "disconnect-off.json",
+      "public_title": "AC quit after work outside"
     },
     {
       "id": "dirty-condenser-coil",
       "title": "Intermittent cooling: outdoor coil is blocked with debris",
       "difficulty": "intermediate",
-      "file": "dirty-condenser-coil.json"
+      "file": "dirty-condenser-coil.json",
+      "public_title": "AC warm on hot afternoons"
     },
     {
       "id": "cut-thermostat-cable",
       "title": "No cooling: low-voltage cable to the outdoor unit is cut",
       "difficulty": "intermediate",
-      "file": "cut-thermostat-cable.json"
+      "file": "cut-thermostat-cable.json",
+      "public_title": "Outdoor unit silent since last night"
     }
   ]
 }

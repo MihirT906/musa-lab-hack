@@ -1,6 +1,7 @@
 {
   "id": "open-contactor-coil",
   "title": "No cooling: contactor coil is open",
+  "public_title": "Outdoor unit dead, indoor fan runs",
   "difficulty": "beginner",
   "equipment": {
     "make": "Carrier",

@@ -1,6 +1,7 @@
 {
   "id": "failed-outdoor-fan-motor",
   "title": "Warm air: outdoor fan motor has an open winding",
+  "public_title": "AC cools briefly, then goes warm",
   "difficulty": "intermediate",
   "equipment": {
     "make": "Carrier",
