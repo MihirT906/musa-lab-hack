@@ -43,7 +43,7 @@ export async function transcribeAudio(audioData: string, mimeType: string): Prom
       },
       { type: "audio", data: audioData, mime_type: mimeType },
     ],
-    generation_config: { max_output_tokens: 500, temperature: 0, thinking_level: "minimal" },
+    generation_config: { max_output_tokens: 500, temperature: 0 },
   });
 
   const transcript = text.trim();
