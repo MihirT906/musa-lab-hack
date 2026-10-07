@@ -42,7 +42,7 @@ The intended first version is a focused service-call loop:
 - A diagnosis and repair recommendation from the trainee
 - A short scorecard covering safety, diagnostic sequence, evidence, and outcome
 
-This repository contains a working Next.js simulator with six scenarios (four HVAC, two electrical).
+This repository contains a working Next.js simulator with eight HVAC scenarios, all grounded in the manufacturer manuals for one unit, a Carrier 24ACC636 air conditioner; see [scenarios/](scenarios/) and the [source manuals and unit facts](docs/sources/).
 
 ## Run It Locally
 
@@ -56,10 +56,12 @@ Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and sta
 
 ## Code Map
 
-- `lib/scenarios.ts`: scenarios, hidden faults, readings, and the simulator and grader prompts
+- `lib/scenarios.ts`: scenario types and the simulator and grader prompts
+- `scenarios/*.json`: manual-grounded scenario briefs with cited readings
+- `lib/manualScenarios.ts`: reads every brief in `scenarios/` at runtime and converts it to the simulator's scenario format
 - `lib/llm.ts`: model call (Gemini or Claude, chosen by which key is set)
 - `app/api/chat/route.ts`: homeowner and equipment agent
-- `app/api/grade/route.ts`: grading agent (safety, diagnostic order, right fix)
+- `app/api/grade/route.ts`: grading agent (safety, diagnostic order, use of evidence, right fix)
 - `app/api/transcribe/route.ts`: server-side voice transcription
 - `app/Simulator.tsx`, `app/globals.css`: glassmorphism UI with typed and click-to-record input
 
@@ -72,6 +74,8 @@ The hackathon requires an AI-generated codebase and asks teams to record the too
 | GitHub Copilot | Turn the supplied HVAC/electrical service-call simulator concept and hackathon brief into a project README. | This README only |
 | Claude (`claude-fable-5-1`) | Build the service-call simulator as a localhost Next.js web UI with glassmorphism: scenario list and shuffle button on the left, chat with the loaded scenario on the right, a grading agent that scores the interaction, voice as a future step. | All app code |
 | Claude Code (`claude-opus-5-5`) | Run the project, then make sure there is no redundant code and no errors. | Bug and error-handling fixes in `app/` and `lib/`, `next.config.ts`, `.claude/launch.json` |
+| Claude Code (Claude Opus 5.5) | Find official manufacturer manuals and OSHA safety references for one equipment family, extract cited facts for the Carrier 24ACC636, and write a set of scenario briefs grounded in them. | `docs/sources/`, `scenarios/`, `scripts/fetch_sources.sh` |
+| Claude Code (Claude Opus 5.5) | Merge the UI from main and wire the manual-grounded scenario briefs into the simulator. | `lib/manualScenarios.ts`, `lib/scenarios.ts`, `scenarios/*.json` |
 | OpenAI Codex | Add click-to-record voice input, server-side speech transcription, review-before-send behavior, accessible voice states, and configuration guidance without changing the existing chat or grading flow. | `app/Simulator.tsx`, `app/api/transcribe/route.ts`, styles, environment example, and README |
 
 ## Hackathon Pitch

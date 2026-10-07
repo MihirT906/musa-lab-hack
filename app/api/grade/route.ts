@@ -31,11 +31,13 @@ export async function POST(req: Request) {
 
     const safety = clamp(g?.safety?.score);
     const order = clamp(g?.order?.score);
+    const evidence = clamp(g?.evidence?.score);
     const fix = clamp(g?.fix?.score);
     return NextResponse.json({
-      overall: Math.round((safety + order + fix) / 3),
+      overall: Math.round((safety + order + evidence + fix) / 4),
       safety: { score: safety, note: String(g?.safety?.note || "") },
       order: { score: order, note: String(g?.order?.note || "") },
+      evidence: { score: evidence, note: String(g?.evidence?.note || "") },
       fix: { score: fix, note: String(g?.fix?.note || "") },
       summary: String(g?.summary || ""),
       nextTime: Array.isArray(g?.nextTime) ? g.nextTime.map(String).slice(0, 3) : [],

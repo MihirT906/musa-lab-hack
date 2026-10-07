@@ -1,0 +1,327 @@
+{
+  "id": "ac-08",
+  "title": "Poor cooling: system is low on refrigerant",
+  "public_title": "AC runs nonstop, barely cool",
+  "difficulty": "advanced",
+  "equipment": {
+    "make": "Carrier",
+    "model": "24ACC636",
+    "description": "3-ton, 208/230 V single-phase split-system air conditioner, R-410A, scroll compressor, TXV",
+    "facts": "docs/sources/24ACC636-facts.md"
+  },
+  "conditions": {
+    "outdoor_temp_f": 88,
+    "indoor_temp_f": 79
+  },
+  "service_request": "Air conditioner runs all the time and the air is only slightly cool. Has been getting worse over the summer.",
+  "hidden_fault": {
+    "description": "The system is undercharged because of a slow leak at the vapor service valve. Measured subcooling is far below the required 10°F.",
+    "repair": "Do not simply add refrigerant. Report low subcooling and the suspected leak location, and escalate for leak repair, evacuation and recharge by the subcooling method."
+  },
+  "homeowner": {
+    "name": "Tom Brandvold",
+    "persona": "Retired engineer, skeptical, wants numbers and a clear explanation.",
+    "opening_line": "It runs nonstop and never catches up. It's cool-ish at the vents, not cold. It was better in June.",
+    "reveals_if_asked": [
+      "Cooling has been getting gradually worse over about two months.",
+      "A different company added refrigerant two summers ago and did not look for a leak.",
+      "Airflow from the vents is strong.",
+      "The electric bill has gone up noticeably.",
+      "He changes the filter every two months and did so two weeks ago."
+    ],
+    "red_herring": "I think the thermostat is reading wrong, it's in a hallway that gets sun.",
+    "rules": "Speak as a homeowner, not a technician. Never name the fault or a component. Only reveal a fact when the trainee asks something that would surface it."
+  },
+  "checks": [
+    {
+      "id": "thermostat",
+      "label": "Check thermostat mode, setpoint and room temperature",
+      "category": "observation",
+      "requires": [],
+      "result": "Set to COOL, setpoint 72°F, room reads 79°F. The thermostat is calling for cooling.",
+      "abnormal": false,
+      "cite": "SI p. 7"
+    },
+    {
+      "id": "indoor_blower",
+      "label": "Check indoor blower and airflow at the vents",
+      "category": "observation",
+      "requires": [],
+      "result": "Indoor blower is running with strong airflow. Air at the vents is only slightly cool.",
+      "abnormal": true,
+      "cite": "SI p. 7"
+    },
+    {
+      "id": "air_filter",
+      "label": "Inspect the indoor air filter",
+      "category": "observation",
+      "requires": [],
+      "result": "Filter is lightly dusty and not restricting airflow.",
+      "abnormal": false,
+      "cite": "SM p. 62"
+    },
+    {
+      "id": "indoor_coil",
+      "label": "Inspect the indoor coil and suction line for frost",
+      "category": "observation",
+      "requires": [],
+      "result": "No frost or ice on the indoor coil or suction line.",
+      "abnormal": false,
+      "cite": "SM p. 62"
+    },
+    {
+      "id": "breaker_disconnect",
+      "label": "Check the breaker and the outdoor disconnect",
+      "category": "observation",
+      "requires": [],
+      "result": "Two-pole 30 A breaker is ON. Outdoor disconnect is seated in the ON position.",
+      "abnormal": false,
+      "cite": "PD p. 8"
+    },
+    {
+      "id": "outdoor_observe",
+      "label": "Look and listen at the outdoor unit from a safe distance",
+      "category": "observation",
+      "requires": [],
+      "result": "Outdoor fan and compressor are both running. Air coming off the top of the unit is barely warm.",
+      "abnormal": true,
+      "cite": "SI p. 7"
+    },
+    {
+      "id": "condenser_coil",
+      "label": "Inspect the outdoor coil for dirt or blocked airflow",
+      "category": "observation",
+      "requires": [],
+      "result": "Outdoor coil is clean and airflow around the unit is clear.",
+      "abnormal": false,
+      "cite": "SM p. 14"
+    },
+    {
+      "id": "low_voltage_wiring",
+      "label": "Inspect the thermostat cable and low-voltage connections at the outdoor unit",
+      "category": "observation",
+      "requires": [],
+      "result": "Thermostat cable is intact and the connections are tight.",
+      "abnormal": false,
+      "cite": "WD p. 1 note 10"
+    },
+    {
+      "id": "refrigerant_fittings",
+      "label": "Inspect service valves and line fittings for oil residue",
+      "category": "observation",
+      "requires": [],
+      "result": "Oily residue with dust stuck to it around the vapor service valve.",
+      "abnormal": true,
+      "cite": "assumption"
+    },
+    {
+      "id": "coil_voltage",
+      "label": "Measure voltage across the contactor coil (24 V circuit)",
+      "category": "live measurement (simulated)",
+      "requires": [],
+      "result": "26 V across the contactor coil. Normal is 20 to 30 V.",
+      "abnormal": false,
+      "cite": "SM p. 11"
+    },
+    {
+      "id": "contactor_state",
+      "label": "Observe whether the contactor is pulled in",
+      "category": "observation",
+      "requires": [],
+      "result": "Contactor is pulled in.",
+      "abnormal": false,
+      "cite": "SM p. 11"
+    },
+    {
+      "id": "line_voltage",
+      "label": "Measure line voltage L1 to L2 at the contactor line side",
+      "category": "live measurement (simulated)",
+      "requires": [],
+      "result": "232 V L1 to L2. Minimum operating voltage is 197 V.",
+      "abnormal": false,
+      "cite": "PD p. 8"
+    },
+    {
+      "id": "compressor_amps",
+      "label": "Clamp the compressor common lead while running",
+      "category": "live measurement (simulated)",
+      "requires": [],
+      "result": "8.9 A. Rated load amps is 13.6 A.",
+      "abnormal": true,
+      "cite": "PD p. 8"
+    },
+    {
+      "id": "subcooling",
+      "label": "Check charge by the subcooling method",
+      "category": "live measurement (simulated)",
+      "requires": [],
+      "result": "After 15 minutes running: liquid pressure 283 psig, liquid line 90°F. The table calls for 82°F at the required 10°F subcooling, so the line is 8°F too warm, about 2°F of subcooling.",
+      "abnormal": true,
+      "cite": "SI p. 5 Table 2; PD p. 8"
+    },
+    {
+      "id": "lockout",
+      "label": "Turn off the disconnect, lock out and tag it, and verify zero voltage",
+      "category": "safety step",
+      "requires": [],
+      "result": "Disconnect is OFF, locked and tagged. Meter confirms 0 V at the contactor line side.",
+      "abnormal": false,
+      "cite": "SI p. 1"
+    },
+    {
+      "id": "cap_discharge",
+      "label": "Discharge the capacitor with a 15,000-ohm, 2-watt resistor",
+      "category": "safety step",
+      "requires": [
+        "lockout"
+      ],
+      "result": "Capacitor discharged across its terminals.",
+      "abnormal": false,
+      "cite": "SM p. 12"
+    },
+    {
+      "id": "cap_visual",
+      "label": "Inspect the run capacitor for bulging, dents or leaks",
+      "category": "power-off check",
+      "requires": [
+        "lockout"
+      ],
+      "result": "No bulging, dents or leaking.",
+      "abnormal": false,
+      "cite": "SM p. 12"
+    },
+    {
+      "id": "cap_test",
+      "label": "Measure capacitance of the dual run capacitor (H to C and F to C)",
+      "category": "power-off check",
+      "requires": [
+        "lockout",
+        "cap_discharge"
+      ],
+      "result": "H to C reads 44.6 µF and F to C reads 5.0 µF against a 45/5 µF label. Both are within ±10 percent.",
+      "abnormal": false,
+      "cite": "SM p. 12; WD p. 1"
+    },
+    {
+      "id": "contactor_inspect",
+      "label": "Inspect contactor contacts and check coil continuity",
+      "category": "power-off check",
+      "requires": [
+        "lockout"
+      ],
+      "result": "Contacts move freely with no severe burning. Coil shows continuity.",
+      "abnormal": false,
+      "cite": "SM p. 11"
+    },
+    {
+      "id": "fan_motor_ohms",
+      "label": "Check outdoor fan motor windings with an ohmmeter",
+      "category": "power-off check",
+      "requires": [
+        "lockout"
+      ],
+      "result": "Continuity between all three leads and no reading to ground.",
+      "abnormal": false,
+      "cite": "SM p. 19"
+    },
+    {
+      "id": "compressor_ohms",
+      "label": "Check compressor windings C-R, C-S and R-S with an ohmmeter",
+      "category": "power-off check",
+      "requires": [
+        "lockout",
+        "cap_discharge"
+      ],
+      "result": "All three pairs read near 0 ohms (under 10) and there is no reading to ground.",
+      "abnormal": false,
+      "cite": "SM p. 22"
+    },
+    {
+      "id": "pressure_switches",
+      "label": "Check low- and high-pressure switches for continuity",
+      "category": "power-off check",
+      "requires": [
+        "lockout"
+      ],
+      "result": "Both switches show continuity (closed).",
+      "abnormal": false,
+      "cite": "SM p. 13-14"
+    }
+  ],
+  "expected_sequence": [
+    "thermostat",
+    "indoor_blower",
+    "air_filter",
+    "indoor_coil",
+    "outdoor_observe",
+    "condenser_coil",
+    "refrigerant_fittings",
+    "subcooling"
+  ],
+  "key_evidence": [
+    "air_filter",
+    "refrigerant_fittings",
+    "subcooling"
+  ],
+  "diagnosis": {
+    "accept": [
+      "low refrigerant charge",
+      "refrigerant leak",
+      "undercharged system"
+    ],
+    "repair": "Do not simply add refrigerant. Report low subcooling and the suspected leak location, and escalate for leak repair, evacuation and recharge by the subcooling method."
+  },
+  "escalate_when": "Always. Opening the refrigerant circuit, leak repair and charging are work for a certified technician; the trainee's job is to diagnose, document the readings and hand off.",
+  "unsafe_actions": [
+    {
+      "action": "Doing any power-off check without first locking out and verifying zero voltage",
+      "cite": "SI p. 1; SM p. 11"
+    },
+    {
+      "action": "Touching or testing the capacitor before discharging it",
+      "cite": "SM p. 12"
+    },
+    {
+      "action": "Applying power to a capacitor that is bulging, dented or leaking",
+      "cite": "SM p. 12"
+    },
+    {
+      "action": "Pushing in the contactor by hand or jumpering a pressure switch to force the unit to run",
+      "cite": "SM p. 11, 13-14"
+    },
+    {
+      "action": "Restarting the compressor without waiting 3 minutes",
+      "cite": "WD p. 1 note 12"
+    },
+    {
+      "action": "Adding refrigerant without first checking charge by the subcooling method",
+      "cite": "SI p. 8"
+    }
+  ],
+  "scoring": {
+    "safety": {
+      "points": 25,
+      "criteria": "Locks out and verifies zero voltage before any power-off check, discharges the capacitor before touching it, takes none of the unsafe actions, and stops to escalate when the scenario calls for it."
+    },
+    "sequence": {
+      "points": 25,
+      "criteria": "Interviews the homeowner first, then moves from observation to simple checks to component tests, broadly following expected_sequence without skipping straight to a guess."
+    },
+    "evidence": {
+      "points": 25,
+      "criteria": "Cites the key_evidence checks and their readings to support the diagnosis, and rules out at least one plausible alternative."
+    },
+    "outcome": {
+      "points": 25,
+      "criteria": "Names the correct fault and a repair that matches diagnosis.repair, explained clearly enough for the homeowner."
+    }
+  },
+  "assumptions": [
+    "Dual run capacitor is rated 45/5 µF, 440 V. The manuals do not state the rating.",
+    "Normal compressor running current of 11.8 A is illustrative; the manuals give only the 13.6 A rated load.",
+    "Outdoor temperature 88°F and indoor 79°F on the day of the call.",
+    "The oil residue and the 8.9 A reading are illustrative.",
+    "The requirement for technician certification to handle refrigerant comes from general U.S. practice (EPA Section 608), not from the Carrier manuals."
+  ],
+  "instructor_notes": "Conditions are inside the range the installation instructions require for the subcooling method (outdoor 70 to 100°F, indoor 70 to 80°F). Full marks need the trainee to rule out airflow first and to recommend finding the leak, not topping off."
+}

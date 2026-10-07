@@ -1,3 +1,5 @@
+import { manualScenarios } from "./manualScenarios";
+
 export type PublicScenario = {
   id: string;
   trade: "HVAC" | "Electrical";
@@ -14,216 +16,22 @@ export type Scenario = PublicScenario & {
   safety: string[];
   idealOrder: string[];
   fix: string;
+  keyEvidence: string[];
+  acceptedDiagnoses: string[];
+  escalateWhen: string;
 };
 
-export const scenarios: Scenario[] = [
-  {
-    id: "ac-capacitor",
-    trade: "HVAC",
-    title: "AC blowing warm air",
-    difficulty: "Starter",
-    opening:
-      "Hi, thanks for coming. My AC is blowing warm air. The fan inside runs, but the house keeps getting hotter. It started yesterday afternoon.",
-    setting: "Split system, 3-ton R-410A condenser outside, about 9 years old. Hot day, 94°F outside.",
-    fault: "Failed dual run capacitor. The compressor and condenser fan cannot start.",
-    readings: [
-      "Thermostat: set to cool, 72°F setpoint, 81°F indoor, calling for cooling",
-      "Indoor blower: running, air from vents is room temperature",
-      "Outdoor unit: humming, condenser fan blade not spinning, compressor not running",
-      "Contactor: pulled in, 24V present at the coil",
-      "Line voltage at contactor: 241V in, 241V out",
-      "Capacitor visual: top is bulged",
-      "Capacitor test (rated 45/5 µF): 11 µF on the compressor side, 1.2 µF on the fan side",
-      "Compressor windings: normal resistance, not grounded",
-      "Breaker: on, not tripped. Filter: clean",
-    ],
-    safety: [
-      "Shut off power at the outdoor disconnect before opening the panel",
-      "Verify zero voltage with a meter before touching anything",
-      "Discharge the capacitor before handling it",
-    ],
-    idealOrder: [
-      "Ask the homeowner about symptoms and history",
-      "Check thermostat and indoor airflow",
-      "Observe the outdoor unit",
-      "Check control voltage and line voltage at the contactor",
-      "Kill power, verify dead, discharge and test the capacitor",
-    ],
-    fix: "Replace the dual run capacitor with the same 45/5 µF rating and voltage, restore power, and confirm the compressor and fan start and the system cools.",
-  },
-  {
-    id: "ac-low-charge",
-    trade: "HVAC",
-    title: "AC runs all day, house stays warm",
-    difficulty: "Intermediate",
-    opening:
-      "The AC runs all day but the house never gets below 80. It was fine last summer. My electric bill has gone way up too.",
-    setting: "Split system, R-410A, fixed orifice metering device. 90°F outside, 80°F inside.",
-    fault: "Low refrigerant charge caused by a leak at the suction service valve.",
-    readings: [
-      "Thermostat: calling for cooling, 74°F setpoint, 80°F indoor",
-      "Air filter: clean. Evaporator coil: clean, light frost starting on the inlet",
-      "Outdoor unit: compressor and fan both running",
-      "Supply/return temperature split: 11°F (expected 16 to 22°F)",
-      "Suction pressure: 95 psi. Head pressure: 290 psi",
-      "Superheat: 28°F (high). Subcooling: 3°F (low)",
-      "Compressor amps: below nameplate",
-      "Leak check: oily residue and bubbles at the suction service valve",
-      "Capacitor and contactor: normal",
-    ],
-    safety: [
-      "Wear safety glasses and gloves when connecting gauges",
-      "Do not vent refrigerant; recover it properly",
-      "Power off before putting hands in the unit",
-    ],
-    idealOrder: [
-      "Ask the homeowner about history",
-      "Check airflow first: filter, coil, blower",
-      "Measure temperature split",
-      "Connect gauges, read pressures, calculate superheat and subcooling",
-      "Leak search before adding refrigerant",
-    ],
-    fix: "Find and repair the leak at the service valve, pressure test, evacuate, then charge to the manufacturer's target. Topping off without fixing the leak is not a correct fix.",
-  },
-  {
-    id: "furnace-flame-sensor",
-    trade: "HVAC",
-    title: "Furnace starts, then shuts off",
-    difficulty: "Starter",
-    opening:
-      "My furnace keeps clicking on and then shutting right off. I can hear it try a few times and then it gives up. The house is freezing.",
-    setting: "Gas furnace, 80% efficiency, hot surface igniter, about 12 years old.",
-    fault: "Dirty flame sensor. The control board does not detect flame and closes the gas valve.",
-    readings: [
-      "Thermostat: calling for heat, 70°F setpoint, 61°F indoor",
-      "Gas smell: none. Gas supply valve: open",
-      "Sequence: inducer starts, igniter glows, burners light, flame drops out after about 4 seconds",
-      "Retries 3 times, then locks out",
-      "Board error code: 3 flashes then 4, ignition lockout / flame sense",
-      "Flame sensor current: 0.4 µA (normal is roughly 2 to 6 µA)",
-      "Flame sensor visual: rod coated in white and grey oxide",
-      "Pressure switch: closes normally. Filter: slightly dirty. Burner flame: blue and steady",
-    ],
-    safety: [
-      "Ask about or check for a gas smell before doing anything",
-      "Turn off power to the furnace before removing parts",
-      "Shut off the gas before removing the sensor",
-    ],
-    idealOrder: [
-      "Ask the homeowner what they see and hear, and check for gas smell",
-      "Watch a full ignition sequence",
-      "Read the board error code",
-      "Measure flame sensor current",
-      "Power and gas off, then inspect the sensor",
-    ],
-    fix: "Remove and clean the flame sensor with a light abrasive (or replace it), reinstall, and confirm the flame holds and the sensor reads normal microamps.",
-  },
-  {
-    id: "condensate-drain",
-    trade: "HVAC",
-    title: "Water under the indoor unit",
-    difficulty: "Starter",
-    opening:
-      "There's water on the floor by the unit in the hallway closet, and now the AC won't turn on at all. The thermostat looks normal.",
-    setting: "Air handler in a closet with a secondary drain pan and float switch. Humid week.",
-    fault: "Clogged condensate drain line. The float switch tripped and cut the cooling call.",
-    readings: [
-      "Thermostat: powered, calling for cooling, nothing runs",
-      "Breakers: both on",
-      "Drain pan: full of water. Float switch: open (tripped)",
-      "24V at transformer: present. 24V at Y after float switch: 0V",
-      "Drain line outlet outside: no water dripping",
-      "Drain trap: packed with algae and sludge",
-      "Filter: dirty. Evaporator coil: wet, no ice",
-      "Blower and outdoor unit: run normally when the float switch is bypassed for testing",
-    ],
-    safety: [
-      "Turn off power to the air handler before working around the water",
-      "Watch for wet floor and wet electrical parts",
-      "Remove any jumper on the float switch after testing",
-    ],
-    idealOrder: [
-      "Ask the homeowner about the water and when it started",
-      "Check thermostat and breakers",
-      "Inspect the pan and float switch",
-      "Trace 24V through the safety circuit",
-      "Inspect the drain line and trap",
-    ],
-    fix: "Clear the drain line and trap (wet vac at the outlet, then flush), empty the pan, confirm the float switch resets and water drains, and replace the dirty filter.",
-  },
-  {
-    id: "dead-outlets-gfci",
-    trade: "Electrical",
-    title: "Bathroom and garage outlets dead",
-    difficulty: "Starter",
-    opening:
-      "None of the outlets in my bathroom or the garage work since the rain on Tuesday. I checked the breaker box and nothing looks flipped.",
-    setting: "House built in the 1990s. One 20A circuit feeds the garage, an outdoor receptacle and the bathroom.",
-    fault: "Tripped GFCI receptacle in the garage, caused by water in the outdoor receptacle on its load side (broken weather cover).",
-    readings: [
-      "Panel: all breakers on. 120V at the breaker for that circuit",
-      "Bathroom outlet: 0V hot to neutral, 0V hot to ground",
-      "Garage GFCI receptacle (behind a shelf): tripped, 120V on line terminals, 0V on load terminals",
-      "Pressing reset: trips again immediately",
-      "Outdoor receptacle: cover cracked, water and corrosion inside the box",
-      "With the outdoor receptacle disconnected: GFCI resets and holds, bathroom reads 120V",
-      "Homeowner did not know there was a GFCI in the garage",
-    ],
-    safety: [
-      "Test for voltage before touching any conductor",
-      "Prove the tester on a known live source",
-      "Turn the breaker off before opening the wet outdoor box",
-    ],
-    idealOrder: [
-      "Ask the homeowner what stopped working and when",
-      "Check the panel",
-      "Measure at a dead outlet",
-      "Look for an upstream GFCI",
-      "Find out why the GFCI trips before leaving it reset",
-    ],
-    fix: "With the breaker off, replace the damaged outdoor receptacle with a weather-resistant one and an in-use cover, then reset and test the GFCI. Just resetting it is not a full fix.",
-  },
-  {
-    id: "burning-outlet",
-    trade: "Electrical",
-    title: "Burning smell at a bedroom outlet",
-    difficulty: "Dangerous",
-    opening:
-      "There's a burning plastic smell near an outlet in the bedroom, and the lights in there flicker when the space heater is on. Should I be worried?",
-    setting: "15A bedroom circuit, older receptacles wired through push-in (backstab) connections. Space heater plugged in.",
-    fault: "Loose backstab connection on the neutral at the receptacle, overheating under load.",
-    readings: [
-      "Receptacle face: brown discoloration around the neutral slot, warm to the touch",
-      "Voltage at the outlet with no load: 118V",
-      "Voltage at the outlet with the heater running: 104V and unsteady",
-      "Voltage at the panel breaker: 120V steady. Breaker: not tripped, 15A",
-      "Heater draw: about 12.5A",
-      "After power off, receptacle pulled: wires pushed into backstab holes, neutral insulation melted back about an inch, scorch marks",
-      "Other outlets downstream: also flicker, since they feed through this receptacle",
-    ],
-    safety: [
-      "Tell the homeowner to stop using the heater and the outlet right away",
-      "Turn the breaker off and verify dead with a tester before removing the receptacle",
-      "Prove the tester on a known live source",
-      "Check for heat damage in the box before re-energizing",
-    ],
-    idealOrder: [
-      "Ask the homeowner about the smell and what is plugged in, and stop the load",
-      "Look at the receptacle without touching conductors",
-      "Measure voltage with and without load",
-      "Compare with voltage at the panel",
-      "Breaker off, verify dead, then pull the receptacle",
-    ],
-    fix: "With the circuit off, cut back the damaged wire to clean copper, replace the receptacle, terminate on the screw terminals (pigtail the feed-through), and advise that a space heater is a heavy load for this circuit.",
-  },
-];
+// Scenarios are read from the manual-grounded briefs in scenarios/*.json.
+function allScenarios(): Scenario[] {
+  return manualScenarios();
+}
 
 export function getScenario(id: string): Scenario | undefined {
-  return scenarios.find((s) => s.id === id);
+  return allScenarios().find((s) => s.id === id);
 }
 
 export function publicScenarios(): PublicScenario[] {
-  return scenarios.map(({ id, trade, title, difficulty, opening }) => ({
+  return allScenarios().map(({ id, trade, title, difficulty, opening }) => ({
     id,
     trade,
     title,
@@ -261,19 +69,24 @@ export function graderPrompt(s: Scenario): string {
 
 SCENARIO: ${s.title}
 ACTUAL FAULT: ${s.fault}
+ACCEPTED WAYS TO NAME IT: ${s.acceptedDiagnoses.join("; ")}
 CORRECT FIX: ${s.fix}
+WHEN TO STOP AND ESCALATE: ${s.escalateWhen}
 EXPECTED SAFETY STEPS:
 - ${s.safety.join("\n- ")}
 SENSIBLE DIAGNOSTIC ORDER:
 - ${s.idealOrder.join("\n- ")}
+KEY EVIDENCE (checks and results that support the diagnosis or rule out another cause):
+- ${s.keyEvidence.join("\n- ")}
 
-Score three areas from 0 to 100:
+Score four areas from 0 to 100:
 - safety: did the trainee state the safety steps before the risky actions? Unsafe actions cost heavily.
 - order: did they go from simple and likely checks to specific ones, without guessing or swapping parts blindly?
+- evidence: did they take the key evidence checks and cite those readings when giving the diagnosis, and rule out at least one other plausible cause? A correct guess with no supporting readings scores low.
 - fix: did they name the actual fault and a complete, correct repair? No stated diagnosis means 0.
 
 Reply with JSON only, no markdown, in exactly this shape:
-{"safety":{"score":0,"note":""},"order":{"score":0,"note":""},"fix":{"score":0,"note":""},"summary":"","nextTime":["",""]}
+{"safety":{"score":0,"note":""},"order":{"score":0,"note":""},"evidence":{"score":0,"note":""},"fix":{"score":0,"note":""},"summary":"","nextTime":["",""]}
 
 Each note is one sentence. summary is two sentences and may reveal the actual fault. nextTime has two or three short tips.`;
 }

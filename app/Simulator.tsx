@@ -9,6 +9,7 @@ type Grade = {
   overall: number;
   safety: Area;
   order: Area;
+  evidence: Area;
   fix: Area;
   summary: string;
   nextTime: string[];
@@ -301,6 +302,7 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
                   [
                     ["Safety steps", grade.safety],
                     ["Diagnostic order", grade.order],
+                    ["Use of evidence", grade.evidence],
                     ["Right fix", grade.fix],
                   ] as [string, Area][]
                 ).map(([label, a]) => (
@@ -368,9 +370,9 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
                   ? "Recording… click the microphone when you finish"
                   : voiceState === "requesting"
                     ? "Waiting for microphone access…"
-                  : voiceState === "transcribing"
-                    ? "Turning your speech into text…"
-                : "Ask a question, take a reading, or state your diagnosis and fix"
+                    : voiceState === "transcribing"
+                      ? "Turning your speech into text…"
+                      : "Ask a question, take a reading, or state your diagnosis and fix"
             }
             disabled={busy || grading || !!grade || voiceState !== "idle"}
             autoComplete="off"
@@ -387,9 +389,9 @@ export default function Simulator({ scenarios }: { scenarios: PublicScenario[] }
               ? "Recording. Click the microphone when you finish speaking."
               : voiceState === "requesting"
                 ? "Waiting for microphone access."
-              : voiceState === "transcribing"
-                ? "Transcribing your recording."
-                : ""}
+                : voiceState === "transcribing"
+                  ? "Transcribing your recording."
+                  : ""}
           </span>
         </form>
       </section>

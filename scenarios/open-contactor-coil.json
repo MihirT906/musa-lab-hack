@@ -1,0 +1,326 @@
+{
+  "id": "ac-02",
+  "title": "No cooling: contactor coil is open",
+  "public_title": "Outdoor unit dead, indoor fan runs",
+  "difficulty": "beginner",
+  "equipment": {
+    "make": "Carrier",
+    "model": "24ACC636",
+    "description": "3-ton, 208/230 V single-phase split-system air conditioner, R-410A, scroll compressor, TXV",
+    "facts": "docs/sources/24ACC636-facts.md"
+  },
+  "conditions": {
+    "outdoor_temp_f": 88,
+    "indoor_temp_f": 79
+  },
+  "service_request": "Air conditioner stopped cooling. The inside fan blows but the outside unit is not doing anything.",
+  "hidden_fault": {
+    "description": "The contactor coil has failed open. 24 V reaches the coil but the contactor never pulls in, so the compressor and outdoor fan get no power.",
+    "repair": "Replace the contactor, then confirm it pulls in on a call for cooling and both motors start."
+  },
+  "homeowner": {
+    "name": "Marcus Oyelaran",
+    "persona": "Works from home, practical, slightly impatient, gives short answers.",
+    "opening_line": "It quit sometime this morning. Air's blowing inside but it's not cold and the thing outside is dead quiet.",
+    "reveals_if_asked": [
+      "The outside unit is completely silent, no fan and no hum.",
+      "Nothing was done to the system recently.",
+      "No breakers looked tripped when he checked the panel.",
+      "It had been making a chattering or buzzing noise outside for a week or two before it stopped.",
+      "The thermostat display is on and shows cooling."
+    ],
+    "red_herring": "I figure the compressor finally died, the unit's getting old.",
+    "rules": "Speak as a homeowner, not a technician. Never name the fault or a component. Only reveal a fact when the trainee asks something that would surface it."
+  },
+  "checks": [
+    {
+      "id": "thermostat",
+      "label": "Check thermostat mode, setpoint and room temperature",
+      "category": "observation",
+      "requires": [],
+      "result": "Set to COOL, setpoint 72°F, room reads 79°F. The thermostat is calling for cooling.",
+      "abnormal": false,
+      "cite": "SI p. 7"
+    },
+    {
+      "id": "indoor_blower",
+      "label": "Check indoor blower and airflow at the vents",
+      "category": "observation",
+      "requires": [],
+      "result": "Indoor blower is running. Airflow is strong but the air is room temperature.",
+      "abnormal": false,
+      "cite": "SI p. 7"
+    },
+    {
+      "id": "air_filter",
+      "label": "Inspect the indoor air filter",
+      "category": "observation",
+      "requires": [],
+      "result": "Filter is lightly dusty and not restricting airflow.",
+      "abnormal": false,
+      "cite": "SM p. 62"
+    },
+    {
+      "id": "indoor_coil",
+      "label": "Inspect the indoor coil and suction line for frost",
+      "category": "observation",
+      "requires": [],
+      "result": "No frost or ice on the indoor coil or suction line.",
+      "abnormal": false,
+      "cite": "SM p. 62"
+    },
+    {
+      "id": "breaker_disconnect",
+      "label": "Check the breaker and the outdoor disconnect",
+      "category": "observation",
+      "requires": [],
+      "result": "Two-pole 30 A breaker is ON. Outdoor disconnect is seated in the ON position.",
+      "abnormal": false,
+      "cite": "PD p. 8"
+    },
+    {
+      "id": "outdoor_observe",
+      "label": "Look and listen at the outdoor unit from a safe distance",
+      "category": "observation",
+      "requires": [],
+      "result": "Outdoor unit is silent. Neither the fan nor the compressor is running.",
+      "abnormal": true,
+      "cite": "SI p. 7"
+    },
+    {
+      "id": "condenser_coil",
+      "label": "Inspect the outdoor coil for dirt or blocked airflow",
+      "category": "observation",
+      "requires": [],
+      "result": "Outdoor coil is clean and airflow around the unit is clear.",
+      "abnormal": false,
+      "cite": "SM p. 14"
+    },
+    {
+      "id": "low_voltage_wiring",
+      "label": "Inspect the thermostat cable and low-voltage connections at the outdoor unit",
+      "category": "observation",
+      "requires": [],
+      "result": "Thermostat cable is intact and the connections are tight.",
+      "abnormal": false,
+      "cite": "WD p. 1 note 10"
+    },
+    {
+      "id": "refrigerant_fittings",
+      "label": "Inspect service valves and line fittings for oil residue",
+      "category": "observation",
+      "requires": [],
+      "result": "Service valves and fittings are dry and clean.",
+      "abnormal": false,
+      "cite": "assumption"
+    },
+    {
+      "id": "coil_voltage",
+      "label": "Measure voltage across the contactor coil (24 V circuit)",
+      "category": "live measurement (simulated)",
+      "requires": [],
+      "result": "26 V across the contactor coil. Normal is 20 to 30 V.",
+      "abnormal": false,
+      "cite": "SM p. 11"
+    },
+    {
+      "id": "contactor_state",
+      "label": "Observe whether the contactor is pulled in",
+      "category": "observation",
+      "requires": [],
+      "result": "Contactor is not pulled in, even though 26 V is present at the coil.",
+      "abnormal": true,
+      "cite": "SM p. 11"
+    },
+    {
+      "id": "line_voltage",
+      "label": "Measure line voltage L1 to L2 at the contactor line side",
+      "category": "live measurement (simulated)",
+      "requires": [],
+      "result": "232 V L1 to L2. Minimum operating voltage is 197 V.",
+      "abnormal": false,
+      "cite": "PD p. 8"
+    },
+    {
+      "id": "compressor_amps",
+      "label": "Clamp the compressor common lead while running",
+      "category": "live measurement (simulated)",
+      "requires": [],
+      "result": "0 A. The compressor is not running.",
+      "abnormal": true,
+      "cite": "PD p. 8"
+    },
+    {
+      "id": "subcooling",
+      "label": "Check charge by the subcooling method",
+      "category": "live measurement (simulated)",
+      "requires": [],
+      "result": "Cannot be taken: the system will not run steadily for the required 15 minutes.",
+      "abnormal": false,
+      "cite": "SI p. 5 Table 2; PD p. 8"
+    },
+    {
+      "id": "lockout",
+      "label": "Turn off the disconnect, lock out and tag it, and verify zero voltage",
+      "category": "safety step",
+      "requires": [],
+      "result": "Disconnect is OFF, locked and tagged. Meter confirms 0 V at the contactor line side.",
+      "abnormal": false,
+      "cite": "SI p. 1"
+    },
+    {
+      "id": "cap_discharge",
+      "label": "Discharge the capacitor with a 15,000-ohm, 2-watt resistor",
+      "category": "safety step",
+      "requires": [
+        "lockout"
+      ],
+      "result": "Capacitor discharged across its terminals.",
+      "abnormal": false,
+      "cite": "SM p. 12"
+    },
+    {
+      "id": "cap_visual",
+      "label": "Inspect the run capacitor for bulging, dents or leaks",
+      "category": "power-off check",
+      "requires": [
+        "lockout"
+      ],
+      "result": "No bulging, dents or leaking.",
+      "abnormal": false,
+      "cite": "SM p. 12"
+    },
+    {
+      "id": "cap_test",
+      "label": "Measure capacitance of the dual run capacitor (H to C and F to C)",
+      "category": "power-off check",
+      "requires": [
+        "lockout",
+        "cap_discharge"
+      ],
+      "result": "H to C reads 44.6 µF and F to C reads 5.0 µF against a 45/5 µF label. Both are within ±10 percent.",
+      "abnormal": false,
+      "cite": "SM p. 12; WD p. 1"
+    },
+    {
+      "id": "contactor_inspect",
+      "label": "Inspect contactor contacts and check coil continuity",
+      "category": "power-off check",
+      "requires": [
+        "lockout"
+      ],
+      "result": "Contacts move freely by inspection. The coil reads open, with no continuity.",
+      "abnormal": true,
+      "cite": "SM p. 11"
+    },
+    {
+      "id": "fan_motor_ohms",
+      "label": "Check outdoor fan motor windings with an ohmmeter",
+      "category": "power-off check",
+      "requires": [
+        "lockout"
+      ],
+      "result": "Continuity between all three leads and no reading to ground.",
+      "abnormal": false,
+      "cite": "SM p. 19"
+    },
+    {
+      "id": "compressor_ohms",
+      "label": "Check compressor windings C-R, C-S and R-S with an ohmmeter",
+      "category": "power-off check",
+      "requires": [
+        "lockout",
+        "cap_discharge"
+      ],
+      "result": "All three pairs read near 0 ohms (under 10) and there is no reading to ground.",
+      "abnormal": false,
+      "cite": "SM p. 22"
+    },
+    {
+      "id": "pressure_switches",
+      "label": "Check low- and high-pressure switches for continuity",
+      "category": "power-off check",
+      "requires": [
+        "lockout"
+      ],
+      "result": "Both switches show continuity (closed).",
+      "abnormal": false,
+      "cite": "SM p. 13-14"
+    }
+  ],
+  "expected_sequence": [
+    "thermostat",
+    "indoor_blower",
+    "breaker_disconnect",
+    "outdoor_observe",
+    "line_voltage",
+    "coil_voltage",
+    "contactor_state",
+    "lockout",
+    "contactor_inspect"
+  ],
+  "key_evidence": [
+    "coil_voltage",
+    "contactor_state",
+    "contactor_inspect"
+  ],
+  "diagnosis": {
+    "accept": [
+      "failed contactor",
+      "open contactor coil",
+      "defective contactor or coil"
+    ],
+    "repair": "Replace the contactor, then confirm it pulls in on a call for cooling and both motors start."
+  },
+  "escalate_when": "Stop if the replacement contactor pulls in but the motors still do not run; continue diagnosis under supervision.",
+  "unsafe_actions": [
+    {
+      "action": "Doing any power-off check without first locking out and verifying zero voltage",
+      "cite": "SI p. 1; SM p. 11"
+    },
+    {
+      "action": "Touching or testing the capacitor before discharging it",
+      "cite": "SM p. 12"
+    },
+    {
+      "action": "Applying power to a capacitor that is bulging, dented or leaking",
+      "cite": "SM p. 12"
+    },
+    {
+      "action": "Pushing in the contactor by hand or jumpering a pressure switch to force the unit to run",
+      "cite": "SM p. 11, 13-14"
+    },
+    {
+      "action": "Restarting the compressor without waiting 3 minutes",
+      "cite": "WD p. 1 note 12"
+    },
+    {
+      "action": "Adding refrigerant without first checking charge by the subcooling method",
+      "cite": "SI p. 8"
+    }
+  ],
+  "scoring": {
+    "safety": {
+      "points": 25,
+      "criteria": "Locks out and verifies zero voltage before any power-off check, discharges the capacitor before touching it, takes none of the unsafe actions, and stops to escalate when the scenario calls for it."
+    },
+    "sequence": {
+      "points": 25,
+      "criteria": "Interviews the homeowner first, then moves from observation to simple checks to component tests, broadly following expected_sequence without skipping straight to a guess."
+    },
+    "evidence": {
+      "points": 25,
+      "criteria": "Cites the key_evidence checks and their readings to support the diagnosis, and rules out at least one plausible alternative."
+    },
+    "outcome": {
+      "points": 25,
+      "criteria": "Names the correct fault and a repair that matches diagnosis.repair, explained clearly enough for the homeowner."
+    }
+  },
+  "assumptions": [
+    "Dual run capacitor is rated 45/5 µF, 440 V. The manuals do not state the rating.",
+    "Normal compressor running current of 11.8 A is illustrative; the manuals give only the 13.6 A rated load.",
+    "Outdoor temperature 88°F and indoor 79°F on the day of the call."
+  ],
+  "instructor_notes": "Correct coil voltage with no pull-in is the service manual's test for replacing the contactor. The trainee should not push the contactor in by hand."
+}
