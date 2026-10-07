@@ -3,6 +3,7 @@ import { callLLM, type Msg } from "../../../lib/llm";
 import { getScenario, graderPrompt } from "../../../lib/scenarios";
 
 const clamp = (n: unknown) => Math.max(0, Math.min(100, Math.round(Number(n) || 0)));
+const weight = (n: unknown) => Math.max(0, Number(n) || 0);
 
 export async function POST(req: Request) {
   try {
@@ -33,8 +34,24 @@ export async function POST(req: Request) {
     const order = clamp(g?.order?.score);
     const evidence = clamp(g?.evidence?.score);
     const fix = clamp(g?.fix?.score);
+    const weights = {
+      safety: weight(scenario.scoring.safety.points),
+      order: weight(scenario.scoring.sequence.points),
+      evidence: weight(scenario.scoring.evidence.points),
+      fix: weight(scenario.scoring.outcome.points),
+    };
+    const totalWeight = weights.safety + weights.order + weights.evidence + weights.fix;
+    const overall = totalWeight
+      ? Math.round(
+          (safety * weights.safety +
+            order * weights.order +
+            evidence * weights.evidence +
+            fix * weights.fix) /
+            totalWeight
+        )
+      : Math.round((safety + order + evidence + fix) / 4);
     return NextResponse.json({
-      overall: Math.round((safety + order + evidence + fix) / 4),
+      overall,
       safety: { score: safety, note: String(g?.safety?.note || "") },
       order: { score: order, note: String(g?.order?.note || "") },
       evidence: { score: evidence, note: String(g?.evidence?.note || "") },

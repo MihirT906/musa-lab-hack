@@ -34,8 +34,9 @@ Scenario ids are neutral (`ac-01` to `ac-08`) because they are sent to the brows
 | `safety` | `expected_sequence`, `escalate_when`, `unsafe_actions` | Lockout step, capacitor discharge step if relevant, the escalation rule, then one "Never: ..." line per unsafe action. |
 | `idealOrder` | `expected_sequence` | "Ask the homeowner..." followed by the labels of the expected checks, in order. |
 | `keyEvidence` | `key_evidence` joined to `checks` | One line per key check as "label: result". Can include normal readings that rule out another cause. |
+| `scoring` | `scoring` | The scenario's criteria and point weight for safety, sequence, evidence, and outcome. |
 
-The grader returns four areas, each 0 to 100 with a one-sentence note: `safety`, `order`, `evidence`, `fix`. It also returns `summary` and `nextTime`. The route averages the four into `overall`.
+The grader returns four areas, each 0 to 100 with a one-sentence note: `safety`, `order`, `evidence`, `fix`. It also returns `summary` and `nextTime`. The route calculates `overall` using the scenario's point allocations as weights; `sequence` weights `order`, and `outcome` weights `fix`.
 
 The response shape the UI expects:
 
@@ -69,7 +70,6 @@ These are in every brief but are dropped by the adapter. Each is a possible impr
 | `checks[].requires` | Safety steps that must precede a check (`lockout`, `cap_discharge`) | Detect a power-off check done before lockout, instead of relying on the model to notice. |
 | `checks[].abnormal` | Whether a result differs from a healthy unit | Tell whether the trainee found the abnormal readings or only took normal ones. |
 | `checks[].category` | `observation`, `live measurement (simulated)`, `power-off check`, `safety step` | Reward moving from observation to measurement to component tests. |
-| `scoring` | Intended rubric: safety, sequence, evidence, outcome at 25 points each, with criteria text | Align the grader's wording and weights with it. The app currently weights the four areas equally out of 100 each. |
 | `homeowner.red_herring` | A misleading suggestion from the homeowner | Credit the trainee for not following it without evidence. |
 | `instructor_notes` | The teaching point of the scenario | Use in `summary` or `nextTime`. |
 | `assumptions` | Values not taken from the manuals | Do not present these as manufacturer figures in feedback. |

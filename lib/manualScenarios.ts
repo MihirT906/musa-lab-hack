@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "fs";
 import path from "path";
-import type { Scenario } from "./scenarios";
+import type { Scenario, ScenarioScoring } from "./scenarios";
 
 // Shape of the manual-grounded briefs in scenarios/*.json (see scenarios/README.md).
 type Brief = {
@@ -17,6 +17,7 @@ type Brief = {
   diagnosis: { accept: string[]; repair: string };
   escalate_when: string;
   unsafe_actions: { action: string }[];
+  scoring: ScenarioScoring;
 };
 
 const LOCKOUT = "Turn off the disconnect, lock out and tag it, and verify zero voltage before any power-off check";
@@ -63,6 +64,7 @@ function toScenario(b: Brief): Scenario {
     }),
     acceptedDiagnoses: b.diagnosis.accept,
     escalateWhen: b.escalate_when,
+    scoring: b.scoring,
   };
 }
 
