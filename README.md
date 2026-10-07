@@ -48,10 +48,11 @@ This repository contains a working Next.js simulator with six scenarios (four HV
 
 1. Install Node.js 18.18 or newer.
 2. Run `npm install`.
-3. Copy `.env.local.example` to `.env.local` and add one key: `GEMINI_API_KEY` (free tier, https://aistudio.google.com/apikey) or `ANTHROPIC_API_KEY` (https://console.anthropic.com).
-4. Run `npm run dev` and open http://localhost:3000.
+3. Copy `.env.local.example` to `.env.local` and add one chat-model key: `GEMINI_API_KEY` (free tier, https://aistudio.google.com/apikey) or `ANTHROPIC_API_KEY` (https://console.anthropic.com).
+4. Add `OPENAI_API_KEY` to enable click-to-record transcription. Typed chat still works without it.
+5. Run `npm run dev` and open http://localhost:3000.
 
-Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and state your checks in the chat, then press Finish and get score.
+Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and state your checks in the chat, then press Finish and get score. For voice input, click the microphone to start recording, click it again to stop, review the transcript, and press Send.
 
 ## Code Map
 
@@ -59,7 +60,8 @@ Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and sta
 - `lib/llm.ts`: model call (Gemini or Claude, chosen by which key is set)
 - `app/api/chat/route.ts`: homeowner and equipment agent
 - `app/api/grade/route.ts`: grading agent (safety, diagnostic order, right fix)
-- `app/Simulator.tsx`, `app/globals.css`: glassmorphism UI; the mic button is a placeholder for voice
+- `app/api/transcribe/route.ts`: server-side voice transcription
+- `app/Simulator.tsx`, `app/globals.css`: glassmorphism UI with typed and click-to-record input
 
 ## AI Build Log
 
@@ -70,6 +72,7 @@ The hackathon requires an AI-generated codebase and asks teams to record the too
 | GitHub Copilot | Turn the supplied HVAC/electrical service-call simulator concept and hackathon brief into a project README. | This README only |
 | Claude (`claude-fable-5-1`) | Build the service-call simulator as a localhost Next.js web UI with glassmorphism: scenario list and shuffle button on the left, chat with the loaded scenario on the right, a grading agent that scores the interaction, voice as a future step. | All app code |
 | Claude Code (`claude-opus-5-5`) | Run the project, then make sure there is no redundant code and no errors. | Bug and error-handling fixes in `app/` and `lib/`, `next.config.ts`, `.claude/launch.json` |
+| OpenAI Codex | Add click-to-record voice input, server-side speech transcription, review-before-send behavior, accessible voice states, and configuration guidance without changing the existing chat or grading flow. | `app/Simulator.tsx`, `app/api/transcribe/route.ts`, styles, environment example, and README |
 
 ## Hackathon Pitch
 
