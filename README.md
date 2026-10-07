@@ -42,7 +42,24 @@ The intended first version is a focused service-call loop:
 - A diagnosis and repair recommendation from the trainee
 - A short scorecard covering safety, diagnostic sequence, evidence, and outcome
 
-This repository currently contains the project brief only; the simulator implementation and its run instructions have not yet been added.
+This repository contains a working Next.js simulator with six scenarios (four HVAC, two electrical).
+
+## Run It Locally
+
+1. Install Node.js 18.18 or newer.
+2. Run `npm install`.
+3. Copy `.env.local.example` to `.env.local` and add one key: `GEMINI_API_KEY` (free tier, https://aistudio.google.com/apikey) or `ANTHROPIC_API_KEY` (https://console.anthropic.com).
+4. Run `npm run dev` and open http://localhost:3000.
+
+Pick a scenario on the left (or Shuffle scenario), talk to the homeowner and state your checks in the chat, then press Finish and get score.
+
+## Code Map
+
+- `lib/scenarios.ts`: scenarios, hidden faults, readings, and the simulator and grader prompts
+- `lib/llm.ts`: model call (Gemini or Claude, chosen by which key is set)
+- `app/api/chat/route.ts`: homeowner and equipment agent
+- `app/api/grade/route.ts`: grading agent (safety, diagnostic order, right fix)
+- `app/Simulator.tsx`, `app/globals.css`: glassmorphism UI; the mic button is a placeholder for voice
 
 ## AI Build Log
 
@@ -51,6 +68,8 @@ The hackathon requires an AI-generated codebase and asks teams to record the too
 | Tool | Prompt or task | Scope |
 | --- | --- | --- |
 | GitHub Copilot | Turn the supplied HVAC/electrical service-call simulator concept and hackathon brief into a project README. | This README only |
+| Claude (`claude-fable-5-1`) | Build the service-call simulator as a localhost Next.js web UI with glassmorphism: scenario list and shuffle button on the left, chat with the loaded scenario on the right, a grading agent that scores the interaction, voice as a future step. | All app code |
+| Claude Code (`claude-opus-5-5`) | Run the project, then make sure there is no redundant code and no errors. | Bug and error-handling fixes in `app/` and `lib/`, `next.config.ts`, `.claude/launch.json` |
 
 ## Hackathon Pitch
 
