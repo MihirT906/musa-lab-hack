@@ -42,7 +42,7 @@ The intended first version is a focused service-call loop:
 - A diagnosis and repair recommendation from the trainee
 - A short scorecard covering safety, diagnostic sequence, evidence, and outcome
 
-The `UI` branch contains a working Next.js simulator with six scenarios (four HVAC, two electrical).
+This repository contains a working Next.js simulator with six scenarios (four HVAC, two electrical).
 
 ## Run It Locally
 
@@ -68,7 +68,8 @@ The hackathon requires an AI-generated codebase and asks teams to record the too
 | Tool | Prompt or task | Scope |
 | --- | --- | --- |
 | GitHub Copilot | Turn the supplied HVAC/electrical service-call simulator concept and hackathon brief into a project README. | This README only |
-| Claude (`claude-fable-5-1`) | Build the service-call simulator as a localhost Next.js web UI with glassmorphism: scenario list and shuffle button on the left, chat with the loaded scenario on the right, a grading agent that scores the interaction, voice as a future step. | All app code on the `UI` branch |
+| Claude (`claude-fable-5-1`) | Build the service-call simulator as a localhost Next.js web UI with glassmorphism: scenario list and shuffle button on the left, chat with the loaded scenario on the right, a grading agent that scores the interaction, voice as a future step. | All app code |
+| Claude Code (`claude-opus-5-5`) | Run the project, then make sure there is no redundant code and no errors. | Bug and error-handling fixes in `app/` and `lib/`, `next.config.ts`, `.claude/launch.json` |
 
 ## Hackathon Pitch
 
