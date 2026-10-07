@@ -1,0 +1,58 @@
+{
+  "equipment": {
+    "make": "Carrier",
+    "model": "24ACC636",
+    "description": "3-ton, 208/230 V single-phase split-system air conditioner, R-410A, scroll compressor, TXV",
+    "facts": "docs/sources/24ACC636-facts.md"
+  },
+  "scenarios": [
+    {
+      "id": "failed-run-capacitor",
+      "title": "Warm air: compressor side of the run capacitor has failed",
+      "difficulty": "beginner",
+      "file": "failed-run-capacitor.json"
+    },
+    {
+      "id": "open-contactor-coil",
+      "title": "No cooling: contactor coil is open",
+      "difficulty": "beginner",
+      "file": "open-contactor-coil.json"
+    },
+    {
+      "id": "failed-outdoor-fan-motor",
+      "title": "Warm air: outdoor fan motor has an open winding",
+      "difficulty": "intermediate",
+      "file": "failed-outdoor-fan-motor.json"
+    },
+    {
+      "id": "dirty-air-filter",
+      "title": "Weak, warm airflow: clogged filter and frosted indoor coil",
+      "difficulty": "beginner",
+      "file": "dirty-air-filter.json"
+    },
+    {
+      "id": "low-refrigerant-charge",
+      "title": "Poor cooling: system is low on refrigerant",
+      "difficulty": "advanced",
+      "file": "low-refrigerant-charge.json"
+    },
+    {
+      "id": "disconnect-off",
+      "title": "No cooling: outdoor disconnect left in the OFF position",
+      "difficulty": "beginner",
+      "file": "disconnect-off.json"
+    },
+    {
+      "id": "dirty-condenser-coil",
+      "title": "Intermittent cooling: outdoor coil is blocked with debris",
+      "difficulty": "intermediate",
+      "file": "dirty-condenser-coil.json"
+    },
+    {
+      "id": "cut-thermostat-cable",
+      "title": "No cooling: low-voltage cable to the outdoor unit is cut",
+      "difficulty": "intermediate",
+      "file": "cut-thermostat-cable.json"
+    }
+  ]
+}

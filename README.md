@@ -42,7 +42,7 @@ The intended first version is a focused service-call loop:
 - A diagnosis and repair recommendation from the trainee
 - A short scorecard covering safety, diagnostic sequence, evidence, and outcome
 
-This repository currently contains the project brief only; the simulator implementation and its run instructions have not yet been added.
+This repository currently contains the project brief, the [source manuals and unit facts](docs/sources/), and eight [scenario briefs](scenarios/) for a Carrier 24ACC636 air conditioner. The simulator implementation and its run instructions have not yet been added.
 
 ## AI Build Log
 
@@ -51,6 +51,7 @@ The hackathon requires an AI-generated codebase and asks teams to record the too
 | Tool | Prompt or task | Scope |
 | --- | --- | --- |
 | GitHub Copilot | Turn the supplied HVAC/electrical service-call simulator concept and hackathon brief into a project README. | This README only |
+| Claude Code (Claude Opus 5.5) | Find official manufacturer manuals and OSHA safety references for one equipment family, extract cited facts for the Carrier 24ACC636, and write a set of scenario briefs grounded in them. | `docs/sources/`, `scenarios/`, `scripts/fetch_sources.sh` |
 
 ## Hackathon Pitch
 
