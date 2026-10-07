@@ -12,26 +12,30 @@ async function request(system: string, messages: Msg[]): Promise<string> {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
   if (geminiKey) {
-    const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-      {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-goog-api-key": geminiKey },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: system }] },
-          contents: messages.map((m) => ({
-            role: m.role === "assistant" ? "model" : "user",
-            parts: [{ text: m.content }],
-          })),
-          generationConfig: { maxOutputTokens: 2000, temperature: 0.6 },
-        }),
-      }
-    );
+    const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+    const res = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-goog-api-key": geminiKey },
+      body: JSON.stringify({
+        model,
+        system_instruction: system,
+        store: false,
+        input: messages.map((message) => ({
+          type: message.role === "assistant" ? "model_output" : "user_input",
+          content: [{ type: "text", text: message.content }],
+        })),
+        generation_config: { max_output_tokens: 2000, temperature: 0.6 },
+      }),
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data?.error?.message || `Gemini error ${res.status}`);
-    const parts = data?.candidates?.[0]?.content?.parts || [];
-    return parts.map((p: { text?: string }) => p.text || "").join("");
+    const steps = Array.isArray(data?.steps) ? data.steps : [];
+    return steps
+      .filter((step: { type?: string }) => step.type === "model_output")
+      .flatMap((step: { content?: { type?: string; text?: string }[] }) => step.content || [])
+      .filter((content: { type?: string }) => content.type === "text")
+      .map((content: { text?: string }) => content.text || "")
+      .join("");
   }
 
   if (anthropicKey) {
