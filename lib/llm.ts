@@ -2,6 +2,7 @@ export type Msg = { role: "user" | "assistant"; content: string };
 
 const GEMINI_MAX_ATTEMPTS = 3;
 const GEMINI_RETRYABLE_STATUSES = new Set([429, 503]);
+const GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -22,13 +23,80 @@ export async function callLLM(system: string, messages: Msg[]): Promise<string> 
   return text;
 }
 
+export async function transcribeAudio(audioData: string, mimeType: string): Promise<string> {
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (!geminiKey) {
+    throw new Error("Gemini transcription requires GEMINI_API_KEY in .env.local.");
+  }
+
+  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+  const text = await callGeminiInteraction(geminiKey, {
+    model,
+    system_instruction:
+      "You are a precise speech transcription engine. Transcribe the speaker verbatim in US English. Do not answer, summarize, correct their technical reasoning, or add words they did not say. Preserve measurements, component names, and safety terminology. Return only the transcript as plain text.",
+    store: false,
+    input: [
+      {
+        type: "text",
+        text:
+          "Transcribe this HVAC trainee. Likely vocabulary includes thermostat, contactor, capacitor, compressor, disconnect, breaker, blower, airflow, indoor coil, outdoor coil, suction line, refrigerant, voltage, amperage, ohms, microfarads, L1, L2, lockout, and tagout.",
+      },
+      { type: "audio", data: audioData, mime_type: mimeType },
+    ],
+    generation_config: { max_output_tokens: 500, temperature: 0, thinking_level: "minimal" },
+  });
+
+  const transcript = text.trim();
+  if (!transcript) throw new Error("Gemini did not return a transcript. Please record again.");
+  return transcript;
+}
+
+async function callGeminiInteraction(
+  geminiKey: string,
+  requestBody: Record<string, unknown>
+): Promise<string> {
+  const body = JSON.stringify(requestBody);
+
+  for (let attempt = 0; attempt < GEMINI_MAX_ATTEMPTS; attempt++) {
+    const res = await fetch(GEMINI_INTERACTIONS_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-goog-api-key": geminiKey },
+      body,
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok) {
+      const steps = Array.isArray(data?.steps) ? data.steps : [];
+      return steps
+        .filter((step: { type?: string }) => step.type === "model_output")
+        .flatMap((step: { content?: { type?: string; text?: string }[] }) => step.content || [])
+        .filter((content: { type?: string }) => content.type === "text")
+        .map((content: { text?: string }) => content.text || "")
+        .join("");
+    }
+
+    const retryable = GEMINI_RETRYABLE_STATUSES.has(res.status);
+    const hasAnotherAttempt = attempt + 1 < GEMINI_MAX_ATTEMPTS;
+    if (!retryable || !hasAnotherAttempt) {
+      if (retryable) {
+        throw new Error("Gemini is temporarily busy. Please wait a moment and try again.");
+      }
+      throw new Error(data?.error?.message || `Gemini error ${res.status}`);
+    }
+
+    await wait(retryDelayMs(res.headers.get("retry-after"), attempt));
+  }
+
+  throw new Error("Gemini is temporarily unavailable. Please try again.");
+}
+
 async function request(system: string, messages: Msg[]): Promise<string> {
   const geminiKey = process.env.GEMINI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
   if (geminiKey) {
     const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-    const body = JSON.stringify({
+    return callGeminiInteraction(geminiKey, {
       model,
       system_instruction: system,
       store: false,
@@ -38,38 +106,6 @@ async function request(system: string, messages: Msg[]): Promise<string> {
       })),
       generation_config: { max_output_tokens: 2000, temperature: 0.6 },
     });
-
-    for (let attempt = 0; attempt < GEMINI_MAX_ATTEMPTS; attempt++) {
-      const res = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-goog-api-key": geminiKey },
-        body,
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok) {
-        const steps = Array.isArray(data?.steps) ? data.steps : [];
-        return steps
-          .filter((step: { type?: string }) => step.type === "model_output")
-          .flatMap((step: { content?: { type?: string; text?: string }[] }) => step.content || [])
-          .filter((content: { type?: string }) => content.type === "text")
-          .map((content: { text?: string }) => content.text || "")
-          .join("");
-      }
-
-      const retryable = GEMINI_RETRYABLE_STATUSES.has(res.status);
-      const hasAnotherAttempt = attempt + 1 < GEMINI_MAX_ATTEMPTS;
-      if (!retryable || !hasAnotherAttempt) {
-        if (retryable) {
-          throw new Error("Gemini is temporarily busy. Please wait a moment and try again.");
-        }
-        throw new Error(data?.error?.message || `Gemini error ${res.status}`);
-      }
-
-      await wait(retryDelayMs(res.headers.get("retry-after"), attempt));
-    }
-
-    throw new Error("Gemini is temporarily unavailable. Please try again.");
   }
 
   if (anthropicKey) {
